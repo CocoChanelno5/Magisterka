@@ -16,6 +16,9 @@ library(rgdal)
 library(ggplot2)
 library(hrbrthemes)
 library(lubridate)
+library(gridExtra)
+library(stringr)
+library(zoo)
 setwd("~/Desktop/Magisterka/Master_git")
 
 ############## FUNCTIONS ####################
@@ -383,6 +386,3 @@ matrix_W_distance<-function(map,g=1,f = distCosine){
   W<- W / as.matrix(rowSums(W)) %*% matrix(1, nrow = 1, ncol = nrow(distance))
   return(W)
 }
-
-df<-df[df$ID%in%USA_states,]
-df<-df[df$Description=="All industry total",]

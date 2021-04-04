@@ -25,7 +25,7 @@ a<-PL_map@data$NUTS_NAME
 W_PL<- matrix_W_distance(PL_map)
 W_USA<- matrix_W_distance(USA_map)
 
-# setting dataset of unemployment in Poland
+############## setting dataset of unemployment in Poland
 df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
            sheet="PL_%BEZR")
 id_list<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
@@ -41,59 +41,107 @@ for (i in 4:ncol(df)){
   colnames(df)[i]<-paste0(years[i-3],"/",months[i-3],"/1")
 }
 
-df_change<-select(df,"ID")
-for (i in 16:ncol(df)){
-  temp<-(df[,i] - df[,i-12])
-  print(temp)
-  df_change<-cbind(df_change,temp)}
+df<-df[,1:125]
+df$MEAN<-rowMeans(df[,4:ncol(df)],na.rm=TRUE)
+df$MIN<-apply(df[,4:ncol(df)],1,FUN=min,na.rm=TRUE)
+df$MAX<-apply(df[,4:ncol(df)],1,FUN=max,na.rm=TRUE)
+PL_UE <- df
+'''
+v_max<-c()
+v_min<-c()
+vmax_name<-c()
+vmin_name<-c()
+for (i in 1:nrow(df)){
+  d<-df[i,]
+  v_max<-append(v_max,colnames(d)[which(d[,4:125] == d$MAX, arr.ind = FALSE)])
+  vmax_name<-append(vmax_name,rep(d$Name,length(colnames(d)[which(d[,4:125] == d$MAX, arr.ind = FALSE)])))
+  v_min<-append(v_min,colnames(d)[which(d[,4:125] == d$MIN, arr.ind = FALSE)])
+  vmin_name<-append(vmin_name,rep(d$Name,length(colnames(d)[which(d[,4:125] == d$MIN, arr.ind = FALSE)])))
+  d$trial<-v_max}
+  '''
 
-PL_ST <- df %>%
+## level
+PL_UE <- df %>%
   pivot_longer(
     cols = starts_with("2"),
     names_to = "Period",
     values_to = "Value",
   )
-PL_ST$Date<-as.Date(ymd(PL_ST$Period))
-tail(PL_ST,12)
+PL_UE$Date<-as.Date(ymd(PL_UE$Period))
+tail(PL_UE,12)
 mlata<-ncol(df)-3
+
+## change
+df_change<-select(df,c("NAME","ID","Name"))
+for (i in 16:(ncol(df)-3)){
+  temp<-(df[,i] - df[,i-12])
+  print(temp)
+  df_change<-cbind(df_change,temp)}
+colnames(df_change)[4:ncol(df_change)]<-colnames(df)[16:(ncol(df)-3)]
+
+PL_UE_ch <- df_change %>%
+  pivot_longer(
+    cols = starts_with("2"),
+    names_to = "Period",
+    values_to = "Value",
+  )
+
 #PL_ST$Period<-as.numeric(PL_ST$Period)
 
 # setting dataset of unemployment in Poland
 #PL_EU <- df%>%filter(Gender == "ogółem")%>%select(ID, Name, Year, Value)
 
-# setting dataset of unemployment in USA
+############## setting dataset of unemployment in USA
 df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
                sheet="USA_UE")
 colnames(df)
-names(df)<-c("ID","Year","Period", "Label","Value","%Change(M)","Name","seasonal_adj")
+names(df)<-c("ID","Year","Month", "Label","Value","%Change(M)","Name","seasonal_adj")
 df <- df%>%filter(seasonal_adj == 0) #%>%select(Code, Name, Year, Value)
 USA_UE<-df
 USA_UE$ID<-as.factor(USA_UE$ID)
-df<-df[df$Name%in%USA_states,]
-df<-df[match(colnames(W_USA), df$ID), ]
+USA_UE$Period<-paste0(USA_UE$Year,"/",substr(USA_UE$Month, start = 2, stop = 3),"/01")
+USA_UE$Date<-as.Date(ymd(USA_UE$Period))
 
-# setting dataset of GDP in Poland
-library(stringr)
+df<-USA_UE%>%select(ID,Name,Date,Value)%>%
+  pivot_wider(names_from = Date, values_from = Value)
+df$MEAN<-rowMeans(df[,3:ncol(df)],na.rm=TRUE)
+df$MIN<-apply(df[,3:ncol(df)],1,FUN=min,na.rm=TRUE)
+df$MAX<-apply(df[,3:ncol(df)],1,FUN=max,na.rm=TRUE)
+USA_UE <- df %>%
+  pivot_longer(
+    cols = starts_with("2"),
+    names_to = "Date",
+    values_to = "Value",
+  )
+USA_UE$Date<-as.Date(USA_UE$Date)
+
+#df<-df[df$Name%in%USA_states,]
+#df<-df[match(colnames(W_USA), df$ID), ]
+
+############## setting dataset of GDP in Poland
 df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
                sheet="PL_GDP_M",na=":")
 colnames(df)
-names(df)[names(df) == 'LABEL'] <- 'ID'
-names(df)[names(df) == 'NAME'] <- 'Name'
 df <- filter(df,str_length(df$ID) == 5)    ###filtering by poviats(5 as number of chars in ID)
 df<-df[match(colnames(W_PL), df$ID), ]
+df_ch<-df[,1:21]
+df<-df[,1:21]
+df$MEAN<-rowMeans(df[,3:ncol(df)],na.rm=TRUE)
+df$MIN<-apply(df[,3:ncol(df)],1,FUN=min,na.rm=TRUE)
+df$MAX<-apply(df[,3:ncol(df)],1,FUN=max,na.rm=TRUE)
+
 PL_GDP <- df %>%
   pivot_longer(
     cols = starts_with("2"),
     names_to = "Period",
     values_to = "Value",
   )
-PL_GDP$Period<-as.numeric(PL_GDP$Period)
+PL_GDP$Date<-as.Date(PL_GDP$Period,format="%Y")
 lata<-unique(PL_GDP$Period)
-n_regions<-unique(PL_GDP$Name)
 
-df_change<-select(df,c(ID, Name))
-for (i in 4:ncol(df)){
-    temp<-(df[,i] - df[,i-1])/df[,i-1]*100
+df_change<-select(df_ch,c(ID, Name))
+for (i in 4:ncol(df_ch)){
+    temp<-(df_ch[,i] - df_ch[,i-1])/df_ch[,i-1]*100
     print(temp)
     df_change<-cbind(df_change,temp)}
 PL_GDP_ch <- df_change %>%
@@ -115,26 +163,7 @@ df<-df[df$Name%in%USA_states,]
 #creating vectors of available industries
 sectors_usa<-levels(df$Description)
 
-for (i in 5:67)
-  df[,i]<-as.numeric(df[,i])
-
-USA_GDP <- df %>%
-  pivot_longer(
-    cols = starts_with("2"),
-    names_to = "Time",
-    values_to = "Value",
-  )
-names(USA_GDP)<-c("ID","Name","LineCode", "Sect","Time","Value")
-
-USA_GDP$Period<-ifelse(endsWith(USA_GDP$Time,"Q1"),"Q1",
-                    ifelse(endsWith(USA_GDP$Time,"Q2"),"Q2",ifelse(endsWith(USA_GDP$Time,"Q3"),"Q3","Q4")))
-USA_GDP$Period<-as.factor(USA_GDP$Period)
-USA_GDP$Year<-substr(USA_GDP$Time,1,4)
-
-USA_GDP$Year<-as.Date(USA_GDP$Year,format="%Y")
-USA_GDP$Year<-year(USA_GDP$Year)
-
-###
+## change
 df_change<-select(df,c(ID, Name))
 for (i in 4:ncol(df)){
   temp<-(df[,i] - df[,i-4])/df[,i-4]*100
@@ -145,52 +174,38 @@ PL_GDP_ch <- df_change %>%
     cols = starts_with("2"),
     names_to = "Period",
     values_to = "Value",
-  )  ###filtering by poviats(5 as number of chars in ID)
-PL_GDP_ch$Period<-as.numeric(PL_GDP_ch$Period)
+  ) 
 
-N <- n_regions
-setwd("~/Desktop/Magisterka/Master_git/output")
+for (i in 5:ncol(df))
+  df[,i]<-as.numeric(df[,i])
+df$MEAN<-rowMeans(df[,5:ncol(df)],na.rm=TRUE)
+df$MIN<-apply(df[,5:ncol(df)],1,FUN=min,na.rm=TRUE)
+df$MAX<-apply(df[,5:ncol(df)],1,FUN=max,na.rm=TRUE)
 
-#m1+m0
-png(file = "lines.png", width = 1700, height = 1200)
-par(mfrow = c(7, 4))
-starting.point <- 1
-starting.point.2 <- N
+## level
+USA_GDP <- df%>%filter(Description=="All industry total") %>%
+  pivot_longer(
+    cols = starts_with("2"),
+    names_to = "Time",
+    values_to = "Value",
+  )%>%select(Name,Time,MEAN,MAX,MIN,Value)
 
+USA_GDP$Time<-gsub("_Q1", "-01-01", USA_GDP$Time)
+USA_GDP$Time<-gsub("_Q2", "-04-01", USA_GDP$Time)
+USA_GDP$Time<-gsub("_Q3", "-07-01", USA_GDP$Time)
+USA_GDP$Time<-gsub("_Q4", "-10-01", USA_GDP$Time)
+USA_GDP$Date <- as.Date(USA_GDP$Time, format = "%Y-%m-%d")
+USA_GDP$Date2 <- as.yearqtr(USA_GDP$Time, format = "%Y-%m-%d")
+#names(USA_GDP)<-c("ID","Name","LineCode", "Sect","Time","Value")
+'''USA_GDP$Period<-ifelse(endsWith(USA_GDP$Time,"Q1"),"Q1",
+                    ifelse(endsWith(USA_GDP$Time,"Q2"),"Q2",ifelse(endsWith(USA_GDP$Time,"Q3"),"Q3","Q4")))
+USA_GDP$Period<-as.factor(USA_GDP$Period)
+USA_GDP$Year<-substr(USA_GDP$Time,1,4)
 
+USA_GDP$Year<-as.Date(USA_GDP$Year,format="%Y")
+USA_GDP$Year<-year(USA_GDP$Year)'''
 
-data<-PL_ST
-p<-0
-#draw_timeseries<-function(data){
-plot_list<-list()
-for (i in unique(data$ID)){
-  p<-p+1
-  d<-data%>%filter(ID==i) %>%filter(Value!=0)
-  t<-d$Name
-  m<-mean(d$Value)
-  dmax<-d[which(d$Value == max(d$Value)),]$Date
-  dmin<-d[which(d$Value == min(d$Value)),]$Date
-
-  plot_list[[p]]<-ggplot(data=d,aes(x=Date,y=Value)) +
-                        geom_line( color=main_colour) +
-                        geom_point(shape=21, color=main_colour, fill=main_colour, size=1) +
-                        theme_ipsum() +
-                        theme(plot.title=element_text(size=1, hjust=1, vjust=0.5, face='bold'))+
-                        #annotate(geom="text", x=as.Date("2017-01-01"), y=20089, label="Bitcoin price reached 20k $\nat the end of 2017") +
-                        #annotate(geom="point", x=as.Date("2017-12-17"), y=20089, size=10, shape=21, fill="transparent") +
-                        geom_hline(yintercept=m, color=main_colour2, size=.5)+
-                        geom_vline(xintercept = dmax,color="grey", size=2,alpha = 1/2)+
-                        geom_vline(xintercept = dmin,color="grey", size=2,alpha = 1/2)+
-                        #scale_x_date(limit=c(as.Date("2017-01-01"),as.Date("2017-02-11")))
-                        ggtitle(paste0("Level of GDP in ",t))
-  #plot(plot_list)
-}
-do.call(grid.arrange,c(plot_list,nrow=r,ncol=c))
-res <- marrangeGrob(plot_list, nrow = 4, ncol = 4)
-
-dev.off()
-}
-
+############################## OTHER
 draw<-ggplot(data=PL_ST,aes(x=Date,y=Value)) +
   geom_line( color=main_colour) +
   geom_point(shape=21, color=main_colour, fill=main_colour, size=1) +
