@@ -75,6 +75,97 @@ draw_timelines_matrix(PL_GDP,7, 4,"GDP_PL","GDP",path)
 draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","unemployment rate",path)
 draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","GDP",path)
 
+################### DRAWING MAPS WITH DATA #####################
+#illustrate variable http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf?utm_source=twitterfeed&utm_medium=twitter
+main_colour <- "navy"
+main_colour2<- "deeppink3"
+# pink2, ppink3, violetred3, navy, blue3
+pal <- colorRampPalette(c(main_colour2, main_colour), bias = 1)
+library(RColorBrewer)
+# display.brewer.all()
+# PuBu, Blues,RdPu, PuBuGn
+cuts <- 9
+my.palette <- brewer.pal(n = cuts, name = "OrRd")
+# controling breaks
+#library(classInt)
+#breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
+#spplot(palo_alto, "PrCpInc", col = "transparent", col.regions = my.palette, at = breaks.qt$brks)
+
+# function which draws the map with colours according to Value for one period
+draw_map_variable <- function(map, data, cut, variable, year, title,kolorki) {
+  
+  data<-filter(data,Period==year)
+  sp <- merge(x = map, y = data, by.x = "ID", by.y = "ID")
+  text<-list("sp.text", coordinates(sp), as.character(sp@data$Name),col="black", cex=0.5,font=2)
+  drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
+                  ,cuts = cut,sp.layout = list(text),do.log=TRUE,
+                  par.settings = list(axis.line = list(col =  'transparent')),
+                  main = paste("Wartości ",title,"w roku ",year))
+  return(drawing)
+}
+draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2018, "GDP",my.palette)
+
+data<-PL_GDP
+map<-PL_map
+drawing<-spplot(sp, zcol = "Value", colorkey = TRUE, col.regions = my.palette#(cut) 
+                ,cuts = cuts,sp.layout = list(text),do.log=TRUE,
+                par.settings = list(axis.line = list(col =  'transparent')),
+                main = paste("Wartości w roku ",2018))
+
+
+draw_usamap_variable <- function(map, data, cut, variable, year, per, title, kolorki) {
+  data$Year<-year(data$Date)
+  data$Month<-month(data$Date)
+  data<-data%>%filter(Year==year)%>%filter(Month==per)
+  sp <- merge(y = data, x = map, by.y = "Name", by.x = "NAME")
+  text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.5,font=2)
+  drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
+                  ,cuts = cut,sp.layout = list(text),do.log=TRUE,
+                  par.settings = list(axis.line = list(col =  'transparent')),
+                  main = paste0("Wartości ",title,"w roku ",year," w miesiącu ",per))
+  return(drawing)
+}
+
+draw_usamap_variable <- function(map, data, cut, variable, per, title, kolorki) {
+  data$Year<-year(data$Date)
+  data$Month<-month(data$Date)
+  for (i in USA_years){
+    d<-data%>%filter(Year==i)%>%filter(Month==per)
+    sp <- merge(y = d, x = map, by.y = "Name", by.x = "NAME")
+    text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.5,font=2)
+    drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
+                    ,cuts = cut,sp.layout = list(text),do.log=TRUE,
+                    par.settings = list(axis.line = list(col =  'transparent')),
+                    main = paste0("Wartości ",title,"w roku ",i," w miesiącu ",per))
+  return(drawing)}
+}
+draw_usamap_variable(USA_map, USA_GDP, cuts-1, "Value", 4,"GDP", my.palette)
+
+setwd("~/Desktop/Magisterka/Master_git/output")
+library(graphics)
+png(file = "cos.png", width = 1700, height = 2000, units = "px")
+par(mfrow = c(5, 5))
+for (i in USA_years){
+  print(i)
+  plot(draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", i, 4,"GDP", my.palette))
+}
+
+draw_usamap_variable(USA_map, USA_GDP, cuts-1, "Value", 2018,4,"GDP", my.palette)
+draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", 2018,4,"GDP", my.palette)
+
+op <- par(mfrow=c(3,2)) # funkcja dzielaca obszar roboczy na rzędy i kolumny
+lapply(2005:2018,function(i){
+  plot(draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", i, 4,"GDP", my.palette))# funkcja main to tytul wykresu
+})
+par(op)
+
+
+par(mfrow = c(3, 2))  # 3 rows and 2 columns
+for (i in c("Sturges", "st", "Scott", "sc", "FD", "fr")) {
+  hist(cars$speed, breaks = i, main = paste("method is", i, split = ""))
+}
+
+
 
 
 draw_timeseries<-function(data,variable){
@@ -87,17 +178,17 @@ for (i in unique(data$ID)){
   dmin<-d[which(d$Value == min(d$Value)),]$Date
   
   draw<-ggplot(data=d,aes(x=Date,y=Value)) +
-    geom_line( color=main_colour) +
-    geom_point(shape=21, color=main_colour, fill=main_colour, size=10) +
-    theme_ipsum() +
-    theme(plot.title=element_text(size=1, hjust=1, vjust=0.5, face='bold'))+
-    #annotate(geom="text", x=as.Date("2017-01-01"), y=20089, label="Bitcoin price reached 20k $\nat the end of 2017") +
-    #annotate(geom="point", x=as.Date("2017-12-17"), y=20089, size=10, shape=21, fill="transparent") +
-    geom_hline(yintercept=m, color=main_colour2, size=.5)+
-    #geom_vline(xintercept = dmax,color="grey", size=2,alpha = 1/2)+
-    #geom_vline(xintercept = dmin,color="grey", size=2,alpha = 1/2)+
-    #scale_x_date(limit=c(as.Date("2017-01-01"),as.Date("2017-02-11")))
-    ggtitle(paste0("Level of ",variable," in ",t))
+            geom_line( color=main_colour) +
+            geom_point(shape=21, color=main_colour, fill=main_colour, size=10) +
+            theme_ipsum() +
+            theme(plot.title=element_text(size=1, hjust=1, vjust=0.5, face='bold'))+
+            #annotate(geom="text", x=as.Date("2017-01-01"), y=20089, label="Bitcoin price reached 20k $\nat the end of 2017") +
+            #annotate(geom="point", x=as.Date("2017-12-17"), y=20089, size=10, shape=21, fill="transparent") +
+            geom_hline(yintercept=m, color=main_colour2, size=.5)+
+            #geom_vline(xintercept = dmax,color="grey", size=2,alpha = 1/2)+
+            #geom_vline(xintercept = dmin,color="grey", size=2,alpha = 1/2)+
+            #scale_x_date(limit=c(as.Date("2017-01-01"),as.Date("2017-02-11")))
+            ggtitle(paste0("Level of ",variable," in ",t))
   plot(draw)
 }
 }

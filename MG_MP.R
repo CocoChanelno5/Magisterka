@@ -33,17 +33,16 @@ table(is.na(Y))
 # preparing matryx Y for GDP in USA
 dftemp<-USA_GDP_ch
 Y<-dftemp%>% select(c(ID,Period, Value)) %>% pivot_wider(names_from = ID,values_from = Value)
-Y <- as.matrix(Y[1:18,-1])
+Y <- as.matrix(Y[,-1])
 W<-W_USA
 table(is.na(Y))
+
 ## preparing matryx Y for unemployment rate in USA
 dftemp<-USA_UE_ch
 Y<-dftemp%>% select(c(Name,Period, Value)) %>% pivot_wider(names_from = Name,values_from = Value)
 Y <- as.matrix(Y[,-1])
 W<-W_USA
 table(is.na(Y))
-
-posterior_a <- list()
 
 ############## INITIATE PARAMETERS AND SET HYPERPARAMETERS ##############
 N <- n_regions  # n_states
@@ -79,8 +78,8 @@ hyperpar0 = list(alpha_prior = matrix(c(6, 4, 3, 7), nrow = 2, byrow = TRUE),
 ######################### PARAMETRY DLA PL GDP  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(-0.8, N),
-               mu_0 = rep(-1.5, N),
+               mu_1 = rep(9.5, N),
+               mu_0 = rep(3.5, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
@@ -88,7 +87,7 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(-1.5, -0.8), nrow = 2),
+                 m_prior = matrix(c(3.5 ; 9.5), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -100,8 +99,8 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_"
 ######################### PARAMETRY DLA PL STOPA BEZROBOCIA  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(-0.8, N),
-               mu_0 = rep(-1.5, N),
+               mu_1 = rep(-0.2, N),
+               mu_0 = rep(-1.3, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
@@ -109,7 +108,7 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(-1.5, -0.8), nrow = 2),
+                 m_prior = matrix(c(-1.3 ; -0.2), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -122,10 +121,10 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_UE_",
 
 
 ######################### PARAMETRY DLA USA GDP  ##########
-N <- n_regions
+N <- n_states
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(-0.8, N),
-               mu_0 = rep(-1.5, N),
+               mu_1 = rep(4, N),
+               mu_0 = rep(2.3, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
@@ -133,7 +132,7 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(-1.5, -0.8), nrow = 2),
+                 m_prior = matrix(c(2.3,4), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -144,10 +143,10 @@ print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP_", format(Sys.time(), "%b%d"), ".RData"))
 
 ######################### PARAMETRY DLA USA STOPA BEZROBOCIA  ##########
-N <- n_regions
+N <- n_states
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(-0.8, N),
-               mu_0 = rep(-1.5, N),
+               mu_1 = rep(0.3, N),
+               mu_0 = rep(-0.2, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
@@ -155,7 +154,7 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(-1.5, -0.8), nrow = 2),
+                 m_prior = matrix(c(-0.2 ; 0.3), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -168,11 +167,15 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_UE_"
 ############ POSTERIOR SIMULATION #################################
 posterior_a <- list()
 start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 1000, S0 = 100, S_rho = 10000, S0_rho = 2000, Y = Y, W = W)
+posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 10000, S0_rho = 2000, Y = Y, W = W)
 end <- Sys.time()
 print(end - start)
 
-save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior", format(Sys.time(), "%b%d"), ".RData"))
+save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP", format(Sys.time(), "%b%d"), ".RData"))
+#save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP", format(Sys.time(), "%b%d"), ".RData"))
+#save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_UE", format(Sys.time(), "%b%d"), ".RData"))
+#save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_UE", format(Sys.time(), "%b%d"), ".RData"))
+
 ########### IF SIMULATION RUN BEFORE, START HERE ###################
 setwd("~/post_simul/")
 posterior.all <- posterior_a

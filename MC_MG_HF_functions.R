@@ -292,46 +292,6 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, W) {
 }
 
 
-################### DRAWING MAPS WITH DATA #####################
-#illustrate variable http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf?utm_source=twitterfeed&utm_medium=twitter
-main_colour <- "navy"
-main_colour2<- "deeppink3"
-# pink2, ppink3, violetred3, navy, blue3
-pal <- colorRampPalette(c(main_colour2, main_colour), bias = 1)
-library(RColorBrewer)
-# display.brewer.all()
-# PuBu, Blues,RdPu, PuBuGn
-cuts <- 5
-my.palette <- brewer.pal(n = cuts, name = "OrRd")
-# controling breaks
-#library(classInt)
-#breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
-#spplot(palo_alto, "PrCpInc", col = "transparent", col.regions = my.palette, at = breaks.qt$brks)
-
-# function which draws the map with colours according to Value for one period
-draw_map_variable <- function(spatial_data, cut, variable, year, title,kolorki) {
-  sp<-spatial_data
-  sp@data<-filter(sp@data,Period==year)
-  text<-list("sp.text", coordinates(sp), as.character(sp@data$Name),col="black", cex=0.7,font=2)
-  drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
-         ,cuts = cut,sp.layout = list(text),do.log=TRUE,
-         par.settings = list(axis.line = list(col =  'transparent')),
-         main = paste("Wartości ",title,"w roku ",year))
-  return(draw)
-}
-
-draw_usamap_variable <- function(map,data, cut, variable, year, per, title,kolorki) {
-  data<-data%>%filter(Year==year)%>%filter(Period==per)
-  spatial_data <- merge(y = data, x = map, by.y = "Name", by.x = "NAME")
-  sp<-spatial_data
-  text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.7,font=2)
-  drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
-         ,cuts = cut,sp.layout = list(text),do.log=TRUE,
-         par.settings = list(axis.line = list(col =  'transparent')),
-         main = paste("Wartości ",title,"w roku ",year," w miesiącu ",per))
-  return(drawing)
-}
-
 
 ############################### SPATIAL PL #####################################
 # spatial data for USA : gadm36_USA_1, cb_2018_us_state_20m

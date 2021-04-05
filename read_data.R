@@ -40,12 +40,12 @@ years<-rep(seq(2011,2011+y-1,1),each=12)
 for (i in 4:ncol(df)){
   colnames(df)[i]<-paste0(years[i-3],"/",months[i-3],"/1")
 }
-
+df_ch<-df[,1:125]
 df<-df[,1:125]
 df$MEAN<-rowMeans(df[,4:ncol(df)],na.rm=TRUE)
 df$MIN<-apply(df[,4:ncol(df)],1,FUN=min,na.rm=TRUE)
 df$MAX<-apply(df[,4:ncol(df)],1,FUN=max,na.rm=TRUE)
-PL_UE <- df
+
 '''
 v_max<-c()
 v_min<-c()
@@ -69,15 +69,15 @@ PL_UE <- df %>%
   )
 PL_UE$Date<-as.Date(ymd(PL_UE$Period))
 tail(PL_UE,12)
-mlata<-ncol(df)-3
+nper<-ncol(df)-3
 
 ## change
-df_change<-select(df,c("NAME","ID","Name"))
-for (i in 16:(ncol(df)-3)){
-  temp<-(df[,i] - df[,i-12])
+df_change<-select(df_ch,c("NAME","ID","Name"))
+for (i in 16:ncol(df_ch)){
+  temp<-(df_ch[,i] - df_ch[,i-12])
   print(temp)
   df_change<-cbind(df_change,temp)}
-colnames(df_change)[4:ncol(df_change)]<-colnames(df)[16:(ncol(df)-3)]
+colnames(df_change)[4:ncol(df_change)]<-colnames(df_ch)[16:ncol(df_ch)]
 
 PL_UE_ch <- df_change %>%
   pivot_longer(
@@ -85,43 +85,59 @@ PL_UE_ch <- df_change %>%
     names_to = "Period",
     values_to = "Value",
   )
+summary(PL_UE_ch$Value)   # -1.3 ; -0.2
+var(PL_UE_ch$Value)       # 1.472203
+#    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# -4.100  -1.700      -0.800  -0.739  0.300      2.200
 
 #PL_ST$Period<-as.numeric(PL_ST$Period)
-
-# setting dataset of unemployment in Poland
-#PL_EU <- df%>%filter(Gender == "ogółem")%>%select(ID, Name, Year, Value)
 
 ############## setting dataset of unemployment in USA
 df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
                sheet="USA_UE")
 colnames(df)
-names(df)<-c("ID","Year","Month", "Label","Value","%Change(M)","Name","seasonal_adj")
+names(df)<-c("ID","Year","Month", "Label","Value","NetChange_m","%Change_m","Name","seasonal_adj")
+df$ID<-substr(df$ID,6,7)
 df <- df%>%filter(seasonal_adj == 0) #%>%select(Code, Name, Year, Value)
+df<-df[df$Name%in%USA_states,]
+
+USA_years<-unique(df$Year)
 USA_UE<-df
 USA_UE$ID<-as.factor(USA_UE$ID)
 USA_UE$Period<-paste0(USA_UE$Year,"/",substr(USA_UE$Month, start = 2, stop = 3),"/01")
 USA_UE$Date<-as.Date(ymd(USA_UE$Period))
 
+## change
+USA_UE_ch<-USA_UE%>%select(ID,Name,Date,Year,Month,"NetChange_m")
+USA_UE_ch$Month<-month(USA_UE_ch$Date)
+colnames(USA_UE_ch)[6] <- "Value"
+summary(USA_UE_ch$Value)   # -0.2 ; 0.3
+var(USA_UE_ch$Value)       # 2.42776
+#    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+# -7.6000 -0.6000 -0.2000  0.1543  0.4000 25.9000
+
+## level
 df<-USA_UE%>%select(ID,Name,Date,Value)%>%
   pivot_wider(names_from = Date, values_from = Value)
 df$MEAN<-rowMeans(df[,3:ncol(df)],na.rm=TRUE)
 df$MIN<-apply(df[,3:ncol(df)],1,FUN=min,na.rm=TRUE)
 df$MAX<-apply(df[,3:ncol(df)],1,FUN=max,na.rm=TRUE)
+df<-df[match(colnames(W_USA), df$ID), ]
+
 USA_UE <- df %>%
   pivot_longer(
     cols = starts_with("2"),
     names_to = "Date",
     values_to = "Value",
   )
-USA_UE$Date<-as.Date(USA_UE$Date)
 
-#df<-df[df$Name%in%USA_states,]
-#df<-df[match(colnames(W_USA), df$ID), ]
+USA_UE$Date<-as.Date(USA_UE$Date)
 
 ############## setting dataset of GDP in Poland
 df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
                sheet="PL_GDP_M",na=":")
 colnames(df)
+
 df <- filter(df,str_length(df$ID) == 5)    ###filtering by poviats(5 as number of chars in ID)
 df<-df[match(colnames(W_PL), df$ID), ]
 df_ch<-df[,1:21]
@@ -150,34 +166,49 @@ PL_GDP_ch <- df_change %>%
     names_to = "Period",
     values_to = "Value",
   )  ###filtering by poviats(5 as number of chars in ID)
-PL_GDP_ch$Period<-as.numeric(PL_GDP_ch$Period)
+PL_GDP_ch$Period<-as.Date(as.character(PL_GDP_ch$Period),format="%Y")
+summary(PL_GDP_ch$Value)   # 3.5 ; 9.5
+var(PL_GDP_ch$Value)       # 81.42033
+#    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# -22.2620   0.7782   5.7229   5.8367  12.2333  38.4070
 
-# setting dataset of GDP in USA
+############## setting dataset of GDP in USA
 df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
                sheet="USA_GDP",na="(D)")
 colnames(df)
+df[, c(5:ncol(df))] <- sapply(df[, c(5:ncol(df))], as.numeric)
 names(df)[names(df) == 'GeoName'] <- 'Name'
 df$Description<-as.factor(df$Description)
+df$Name<-as.factor(USA$Name)
+
 df<-df[df$Name%in%USA_states,]
+df<-select(df,-c(3))
+df$GeoFips<-substr(df$GeoFips,1,2)
+colnames(df)[1]<-"ID"
+
 #df$Name<-as.factor(df$Name)
 #creating vectors of available industries
 sectors_usa<-levels(df$Description)
 
 ## change
-df_change<-select(df,c(ID, Name))
-for (i in 4:ncol(df)){
+df<-filter(df,Description=="All industry total")
+df_change<-df%>%select(c(ID, Name))
+for (i in 8:ncol(df)){
   temp<-(df[,i] - df[,i-4])/df[,i-4]*100
   print(temp)
   df_change<-cbind(df_change,temp)}
-PL_GDP_ch <- df_change %>%
+USA_GDP_ch <- df_change %>%
   pivot_longer(
     cols = starts_with("2"),
     names_to = "Period",
     values_to = "Value",
   ) 
+table(is.na(USA_GDP_ch$Value))
+summary(USA_GDP_ch$Value)   # 2.3 ; 4
+var(USA_GDP_ch$Value)       # 14.03696
+#    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+# -21.004   1.668   3.470   3.095   5.019  27.639
 
-for (i in 5:ncol(df))
-  df[,i]<-as.numeric(df[,i])
 df$MEAN<-rowMeans(df[,5:ncol(df)],na.rm=TRUE)
 df$MIN<-apply(df[,5:ncol(df)],1,FUN=min,na.rm=TRUE)
 df$MAX<-apply(df[,5:ncol(df)],1,FUN=max,na.rm=TRUE)
