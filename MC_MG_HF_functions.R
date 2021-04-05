@@ -321,9 +321,8 @@ draw_map<-function(poland){
     ############################### SPATIAL USA #####################################
     USA_map <- readOGR(".", "cb_2018_us_state_20m", verbose = FALSE)
     USA_map <- spTransform(USA_map, "+proj=longlat")
-    USA_map <- USA_map[!(USA_map@data$GEOID %in% c("72","15","02")), ]
-    USA_map@data<-USA_map@data %>% 
-      rename(ID = GEOID)
+    USA_map <- USA_map[!(USA_map@data$GEOID %in% c("72","15","02","11")), ]
+    colnames(USA_map@data)[4]<-"ID"
     n_states <- length(USA_map@data$NAME)
     USA_states<-unique(USA_map@data$NAME)
     #plot(USA_map)

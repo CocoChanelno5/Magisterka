@@ -58,7 +58,7 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir){
                     #annotate(geom="text", x=as.Date("2017-01-01"), y=20089, label="Bitcoin price reached 20k $\nat the end of 2017") +
                     #annotate(geom="point", x=as.Date("2017-12-17"), y=20089, size=10, shape=21, fill="transparent") +
                     #scale_x_date(limit=c(as.Date("2017-01-01"),as.Date("2017-02-11")))
-                    ggtitle(paste0("Level of ",variable," in "))+
+                    ggtitle(paste0("Poziom zmiennej ",variable," w "))+
                     facet_wrap(~Name, ncol=c, nrow=r)+
                     geom_hline(aes(yintercept=MEAN, group=Name), color=main_colour2, size=.5)+
                     geom_hline(aes(yintercept=mean(MEAN)), color=main_colour2, size=.5,alpha = 1/2,linetype = "dashed")+
@@ -70,10 +70,10 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir){
           ggsave(paste0(dir,i,text,".png"), draw, width = 8.27, height = 11.69, units = "in")
   }
 }
-draw_timelines_matrix(PL_UE,7, 4,"BEZR_PL","unemployment rate",path)
-draw_timelines_matrix(PL_GDP,7, 4,"GDP_PL","GDP",path)
-draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","unemployment rate",path)
-draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","GDP",path)
+draw_timelines_matrix(PL_UE,7, 4,"BEZR_PL","'stopa bezrobocia'",path)
+draw_timelines_matrix(PL_GDP,7, 4,"GDP_PL","'PKB'",path)
+draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path)
+draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","'PKB'",path)
 
 ################### DRAWING MAPS WITH DATA #####################
 #illustrate variable http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf?utm_source=twitterfeed&utm_medium=twitter
@@ -100,7 +100,7 @@ draw_map_variable <- function(map, data, cut, variable, year, title,kolorki) {
   drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
                   ,cuts = cut,sp.layout = list(text),do.log=TRUE,
                   par.settings = list(axis.line = list(col =  'transparent')),
-                  main = paste("Wartości ",title,"w roku ",year))
+                  main = paste("Wartości",title,"w roku",year))
   return(drawing)
 }
 draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2018, "GDP",my.palette)

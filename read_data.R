@@ -12,11 +12,13 @@ source("MC_MG_HF_functions.R")
 
 
 ############## LOAD REAL DATA ####################
-PL_map<-draw_map(poland=1)[[1]]  ###draw PL
-USA_map<-draw_map(0)[[1]]
-n_regions<-draw_map(poland=1)[[2]]  ###draw PL
-n_states<-draw_map(0)[[2]]
-USA_states<-draw_map(0)[[3]]###draw USA
+polska<-draw_map(poland=1)
+USA<-draw_map(0)
+PL_map<-polska[[1]]  ###draw PL
+USA_map<-USA[[1]]
+n_regions<-polska[[2]]  ###draw PL
+n_states<-USA[[2]]
+USA_states<-USA[[3]]###draw USA
 plot(PL_map@data)
 plot(USA_map)
 a<-PL_map@data$NUTS_NAME
@@ -103,14 +105,21 @@ df<-df[df$Name%in%USA_states,]
 
 USA_years<-unique(df$Year)
 USA_UE<-df
-USA_UE$ID<-as.factor(USA_UE$ID)
 USA_UE$Period<-paste0(USA_UE$Year,"/",substr(USA_UE$Month, start = 2, stop = 3),"/01")
 USA_UE$Date<-as.Date(ymd(USA_UE$Period))
 
 ## change
-USA_UE_ch<-USA_UE%>%select(ID,Name,Date,Year,Month,"NetChange_m")
-USA_UE_ch$Month<-month(USA_UE_ch$Date)
-colnames(USA_UE_ch)[6] <- "Value"
+df_ch<-USA_UE%>%select(ID,Name,Date,"NetChange_m")
+colnames(df_ch)[4] <- "Value"
+df_ch<-df_ch%>%pivot_wider(names_from = Date, values_from = Value)
+df_ch<-df_ch[match(colnames(W_USA), df_ch$ID), ]
+
+USA_UE_ch<-df_ch%>%pivot_longer(
+  cols = ends_with("1"),
+  names_to = "Date",
+  values_to = "Value",
+)
+
 summary(USA_UE_ch$Value)   # -0.2 ; 0.3
 var(USA_UE_ch$Value)       # 2.42776
 #    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -126,7 +135,7 @@ df<-df[match(colnames(W_USA), df$ID), ]
 
 USA_UE <- df %>%
   pivot_longer(
-    cols = starts_with("2"),
+    cols = ends_with("1"),
     names_to = "Date",
     values_to = "Value",
   )
@@ -179,13 +188,12 @@ colnames(df)
 df[, c(5:ncol(df))] <- sapply(df[, c(5:ncol(df))], as.numeric)
 names(df)[names(df) == 'GeoName'] <- 'Name'
 df$Description<-as.factor(df$Description)
-df$Name<-as.factor(USA$Name)
 
 df<-df[df$Name%in%USA_states,]
 df<-select(df,-c(3))
 df$GeoFips<-substr(df$GeoFips,1,2)
 colnames(df)[1]<-"ID"
-
+df<-df[match(colnames(W_USA), df$ID), ]
 #df$Name<-as.factor(df$Name)
 #creating vectors of available industries
 sectors_usa<-levels(df$Description)
@@ -213,6 +221,7 @@ df$MEAN<-rowMeans(df[,5:ncol(df)],na.rm=TRUE)
 df$MIN<-apply(df[,5:ncol(df)],1,FUN=min,na.rm=TRUE)
 df$MAX<-apply(df[,5:ncol(df)],1,FUN=max,na.rm=TRUE)
 
+
 ## level
 USA_GDP <- df%>%filter(Description=="All industry total") %>%
   pivot_longer(
@@ -220,6 +229,7 @@ USA_GDP <- df%>%filter(Description=="All industry total") %>%
     names_to = "Time",
     values_to = "Value",
   )%>%select(Name,Time,MEAN,MAX,MIN,Value)
+
 
 USA_GDP$Time<-gsub("_Q1", "-01-01", USA_GDP$Time)
 USA_GDP$Time<-gsub("_Q2", "-04-01", USA_GDP$Time)

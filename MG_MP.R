@@ -87,12 +87,12 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(3.5 ; 9.5), nrow = 2),
+                 m_prior = matrix(c(3.5,9.5), nrow = 2),
                  M_prior = diag(2))
 
 
 start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 1000, S0 = 100, S_rho = 10000, S0_rho = 2000, Y = Y, W = W)
+posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_", format(Sys.time(), "%b%d"), ".RData"))
@@ -108,12 +108,12 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(-1.3 ; -0.2), nrow = 2),
+                 m_prior = matrix(c(-1.3,-0.2), nrow = 2),
                  M_prior = diag(2))
 
 
 start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 1000, S0 = 100, S_rho = 10000, S0_rho = 2000, Y = Y, W = W)
+posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_UE_", format(Sys.time(), "%b%d"), ".RData"))
@@ -131,13 +131,13 @@ theta0 <- list(rho = 0.5,
 
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 0.4,
+                 delta_prior = 2,  ## changed from 0.4
                  m_prior = matrix(c(2.3,4), nrow = 2),
                  M_prior = diag(2))
 
 
 start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 1000, S0 = 100, S_rho = 10000, S0_rho = 2000, Y = Y, W = W)
+posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP_", format(Sys.time(), "%b%d"), ".RData"))
@@ -154,12 +154,12 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(-0.2 ; 0.3), nrow = 2),
+                 m_prior = matrix(c(-0.2,0.3), nrow = 2),
                  M_prior = diag(2))
 
 
 start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 1000, S0 = 100, S_rho = 10000, S0_rho = 2000, Y = Y, W = W)
+posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_UE_", format(Sys.time(), "%b%d"), ".RData"))
