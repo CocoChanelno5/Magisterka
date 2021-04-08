@@ -8,7 +8,6 @@ set.seed(42)
 library(mvtnorm)
 library(dplyr)
 library(tidyr)
-library(dplyr)
 library(readr)
 library(lubridate)
 library(readxl)
@@ -290,7 +289,6 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, W) {
   
   return(simulation[(S0+1):nrow(simulation),])
 }
-
 
 
 ############################### SPATIAL PL #####################################

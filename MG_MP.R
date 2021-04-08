@@ -221,10 +221,11 @@ map <- map[order(map$v.order), ]
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
 N <- ncol(Y)
 setwd("~/Desktop/Magisterka/Master_git/output")
-
+n_col<-4
+n_row<-7
 #m1+m0
 png(file = "m1m0.png", width = 1700, height = 1200)
-par(mfrow = c(6, 3))
+par(mfrow = c(n_row, n_col))
 starting.point <- 1
 starting.point.2 <- N
 for (pp in 1:N) {

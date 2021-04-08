@@ -105,6 +105,9 @@ draw_map_variable <- function(map, data, cut, variable, year, title,kolorki) {
 }
 draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2018, "GDP",my.palette)
 
+draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2018, "GDP",my.palette)
+
+
 data<-PL_GDP
 map<-PL_map
 drawing<-spplot(sp, zcol = "Value", colorkey = TRUE, col.regions = my.palette#(cut) 
@@ -129,17 +132,18 @@ draw_usamap_variable <- function(map, data, cut, variable, year, per, title, kol
 draw_usamap_variable <- function(map, data, cut, variable, per, title, kolorki) {
   data$Year<-year(data$Date)
   data$Month<-month(data$Date)
-  for (i in USA_years){
-    d<-data%>%filter(Year==i)%>%filter(Month==per)
+  drawing<-list()
+  for (i in 1:length(USA_years)){
+    d<-data%>%filter(Year==(i+1998))%>%filter(Month==per)
     sp <- merge(y = d, x = map, by.y = "Name", by.x = "NAME")
     text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.5,font=2)
-    drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
+    drawing[[i]]<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
                     ,cuts = cut,sp.layout = list(text),do.log=TRUE,
                     par.settings = list(axis.line = list(col =  'transparent')),
-                    main = paste0("Wartości ",title,"w roku ",i," w miesiącu ",per))
-  return(drawing)}
+                    main = paste0("Wartości ",title," w roku ",i," w miesiącu ",per))}
+  return(drawing)
 }
-draw_usamap_variable(USA_map, USA_GDP, cuts-1, "Value", 4,"GDP", my.palette)
+s<-draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", 4,"GDP", my.palette)
 
 setwd("~/Desktop/Magisterka/Master_git/output")
 library(graphics)
@@ -147,7 +151,8 @@ png(file = "cos.png", width = 1700, height = 2000, units = "px")
 par(mfrow = c(5, 5))
 for (i in USA_years){
   print(i)
-  plot(draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", i, 4,"GDP", my.palette))
+  i<-as.numeric(i)
+  draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", i, 4,"GDP", my.palette)
 }
 
 draw_usamap_variable(USA_map, USA_GDP, cuts-1, "Value", 2018,4,"GDP", my.palette)
