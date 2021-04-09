@@ -1,6 +1,6 @@
 path<-"~/Desktop/Magisterka/Master_git/output/level"
 path2<-"~/Desktop/Magisterka/Master_git/output/change"
-draw_timelines_matrix<-function(data,rows, columns,text, variable, dir){
+draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point){
   N<-length(unique(data$Name))
   r<-rows
   c<-columns
@@ -53,13 +53,13 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir){
     #vline_min<-vline_min[which(vline_min$Name %in% regions),]
     draw<-ggplot(data=d,aes(x=Date,y=Value,group=Name)) +
                     geom_line( color=main_colour) +
-                    geom_point(shape=21, color=main_colour, fill=main_colour, size=1) +
+                    geom_point(shape=21, color=main_colour, fill=main_colour, size=point) +
                     theme_ipsum() +
                     #annotate(geom="text", x=as.Date("2017-01-01"), y=20089, label="Bitcoin price reached 20k $\nat the end of 2017") +
                     #annotate(geom="point", x=as.Date("2017-12-17"), y=20089, size=10, shape=21, fill="transparent") +
                     #scale_x_date(limit=c(as.Date("2017-01-01"),as.Date("2017-02-11")))
                     ggtitle(paste0("Poziom zmiennej ",variable," w "))+
-                    facet_wrap(~Name, ncol=c, nrow=r)+
+                    facet_wrap(~Name, ncol=c, nrow=r,scales = "free_y")+
                     geom_hline(aes(yintercept=MEAN, group=Name), color=main_colour2, size=.5)+
                     geom_hline(aes(yintercept=mean(MEAN)), color=main_colour2, size=.5,alpha = 1/2,linetype = "dashed")+
                     geom_vline(aes(xintercept = DATE_MIN,group=Name),color="grey", size=1,alpha = 1/2)+
@@ -70,10 +70,10 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir){
           ggsave(paste0(dir,i,text,".png"), draw, width = 8.27, height = 11.69, units = "in")
   }
 }
-draw_timelines_matrix(PL_UE,7, 4,"BEZR_PL","'stopa bezrobocia'",path)
-draw_timelines_matrix(PL_GDP,7, 4,"GDP_PL","'PKB'",path)
-draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path)
-draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","'PKB'",path)
+draw_timelines_matrix(PL_UE,7, 4,"BEZR_PL","'stopa bezrobocia'",path,0)
+draw_timelines_matrix(PL_GDP,7, 4,"GDP_PL","'PKB'",path,1)
+draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path,0)
+draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","'PKB'",path,0)
 
 ################### DRAWING MAPS WITH DATA #####################
 #illustrate variable http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf?utm_source=twitterfeed&utm_medium=twitter
@@ -88,8 +88,42 @@ cuts <- 9
 my.palette <- brewer.pal(n = cuts, name = "OrRd")
 # controling breaks
 #library(classInt)
-#breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
-#spplot(palo_alto, "PrCpInc", col = "transparent", col.regions = my.palette, at = breaks.qt$brks)
+breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
+spplot(palo_alto, "PrCpInc", col = "transparent", col.regions = my.palette, at = breaks.qt$brks)
+
+##########################
+path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
+draw_rawY_maps<-function(data,map,text,var,p,nclr,w,h){
+  library(RColorBrewer)
+  library(classInt)
+
+  d<-data%>%select(ID, Name, Period, Value)%>%pivot_wider(names_from =Period, values_from = Value)
+  sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
+  #plotclr <- brewer.pal(nclr,"PuOr")
+  #class <- classIntervals(data$Value, nclr, style="quantile", dataPrecision=4)
+  #colcode <- findColours(class, plotclr)
+  #plot(sp,col=colcode)
+  #legend(legend=names(attr(colcode, "table")), fill=attr(colcode, "palette"), cex=0.8, bty="n")
+  pal <- brewer.pal(nclr, "OrRd") # we select 7 colors from the palette
+  breaks_qt <- classIntervals(data$Value/1000, n = nclr, style = "quantile")
+  br <- breaks_qt$brks 
+  # categoreis for choropleth map
+  for (i in unique(data$Period)){
+    print(i)
+    png(file = paste0("map",text,i,".png"), width = w, height = h)
+    sp@data$bracket <- cut(sp@data[,i]/1000, breaks_qt$brks)
+    # plot
+    print(spplot(sp, "bracket", col.regions=pal,colorkey=FALSE, 
+                 main = paste0("Wartośći ",var," według regionów w roku ",i)))
+    dev.off()
+    #ggsave(paste0(p,text,".png"), draw, width = w,height = h, units = "mm")
+    #8.27, height = 11.69, units = "in"))
+  }}
+draw_rawY_maps(PL_UE,PL_map,"BEZR_PL","'stopa bezrobocia'",path,8,400,400)
+draw_rawY_maps(PL_GDP,PL_map,"GDP_PL","'PKB'",path,8,400,400)
+draw_rawY_maps(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path,0)
+draw_rawY_maps(USA_GDP,7, 4,"GDP_USA","'PKB'",path,0)
+
 
 # function which draws the map with colours according to Value for one period
 draw_map_variable <- function(map, data, cut, variable, year, title,kolorki) {
