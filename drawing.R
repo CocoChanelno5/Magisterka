@@ -1,6 +1,42 @@
-path<-"~/Desktop/Magisterka/Master_git/output/level"
-path2<-"~/Desktop/Magisterka/Master_git/output/change"
-draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point){
+theme.novpadding <-
+  list(axis.line = 
+         list(col =  'transparent'),
+       layout.heights =
+         list(top.padding = 1,
+              main.key.padding = 1,
+              key.axis.padding = 1,
+              axis.xlab.padding = 1,
+              xlab.key.padding = 1,
+              key.sub.padding = 1,
+              bottom.padding = 1),
+       layout.widths =
+         list(left.padding = 0,
+              key.ylab.padding = 0,
+              ylab.axis.padding = 0,
+              axis.key.padding = 0,
+              right.padding = 0))
+par(mfrow=c(5,2))
+par()
+f<-"Arial"
+################### DRAWING MAPS WITH DATA #####################
+#illustrate variable http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf?utm_source=twitterfeed&utm_medium=twitter
+main_colour <- "navy"
+main_colour2<- "deeppink3"
+# pink2, ppink3, violetred3, navy, blue3
+pal <- colorRampPalette(c(main_colour2, main_colour), bias = 1)
+library(RColorBrewer)
+# display.brewer.all()
+# PuBu, Blues,RdPu, PuBuGn
+cuts <- 9
+my.palette <- brewer.pal(n = cuts, name = "OrRd")
+# controling breaks
+#library(classInt)
+breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
+
+#############################################
+file1<-"~/Desktop/Magisterka/Master_git/output/level"
+file2<-"~/Desktop/Magisterka/Master_git/output/change"
+draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point, div){
   N<-length(unique(data$Name))
   r<-rows
   c<-columns
@@ -51,7 +87,7 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point){
     d<-data[which(data$Name %in% regions),]%>%filter(Value!=0)
     #vline_max<-vline_max[which(vline_max$Name %in% regions),]
     #vline_min<-vline_min[which(vline_min$Name %in% regions),]
-    draw<-ggplot(data=d,aes(x=Date,y=Value,group=Name)) +
+    draw<-ggplot(data=d,aes(x=Date,y=Value/div,group=Name)) +
                     geom_line( color=main_colour) +
                     geom_point(shape=21, color=main_colour, fill=main_colour, size=point) +
                     theme_ipsum() +
@@ -60,138 +96,174 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point){
                     #scale_x_date(limit=c(as.Date("2017-01-01"),as.Date("2017-02-11")))
                     ggtitle(paste0("Poziom zmiennej ",variable," w "))+
                     facet_wrap(~Name, ncol=c, nrow=r,scales = "free_y")+
-                    geom_hline(aes(yintercept=MEAN, group=Name), color=main_colour2, size=.5)+
-                    geom_hline(aes(yintercept=mean(MEAN)), color=main_colour2, size=.5,alpha = 1/2,linetype = "dashed")+
+                    geom_hline(aes(yintercept=MEAN/div, group=Name), color=main_colour2, size=.5)+
+                    geom_hline(aes(yintercept=mean(MEAN)/div), color=main_colour2, size=.5,alpha = 1/2,linetype = "dashed")+
                     geom_vline(aes(xintercept = DATE_MIN,group=Name),color="grey", size=1,alpha = 1/2)+
                     geom_vline(aes(xintercept = DATE_MAX,group=Name),color="grey", size=1,alpha = 1/2)+
                     theme(plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 15),
-                          strip.text.x = element_text(size = 10),strip.text.y = element_text(size = 2),axis.text= element_text(size = 0.8,angle=50),text = element_text(size = 1))
+                          axis.text = element_text(size = 0.05, angle=50))+
+                    scale_y_continuous(name="Wartość opisywanej zmiennej")
           plot(draw)
           ggsave(paste0(dir,i,text,".png"), draw, width = 8.27, height = 11.69, units = "in")
   }
 }
-draw_timelines_matrix(PL_UE,7, 4,"BEZR_PL","'stopa bezrobocia'",path,0)
-draw_timelines_matrix(PL_GDP,7, 4,"GDP_PL","'PKB'",path,1)
-draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path,0)
-draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","'PKB'",path,0)
+draw_timelines_matrix(PL_UE,7, 4,"BEZR_PL","'stopa bezrobocia'",file1,0,1)
+draw_timelines_matrix(PL_GDP,7, 4,"GDP_PL","'PKB'",file1,1,1000)
+draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",file1,0,1)
+draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","'PKB'",file1,0,1000)
 
-################### DRAWING MAPS WITH DATA #####################
-#illustrate variable http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf?utm_source=twitterfeed&utm_medium=twitter
-main_colour <- "navy"
-main_colour2<- "deeppink3"
-# pink2, ppink3, violetred3, navy, blue3
-pal <- colorRampPalette(c(main_colour2, main_colour), bias = 1)
-library(RColorBrewer)
-# display.brewer.all()
-# PuBu, Blues,RdPu, PuBuGn
-cuts <- 9
-my.palette <- brewer.pal(n = cuts, name = "OrRd")
-# controling breaks
-#library(classInt)
-breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
-spplot(palo_alto, "PrCpInc", col = "transparent", col.regions = my.palette, at = breaks.qt$brks)
-
-##########################
+########################## drawing single maps with yearly data
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
+path2<-"~/Desktop/Magisterka/Master_git/raw_maps/"
+path3<-"~/Desktop/Magisterka/Master_git/output/"
 draw_rawY_maps<-function(data,map,text,var,p,nclr,w,h){
   library(RColorBrewer)
   library(classInt)
-
+  setwd(p)
   d<-data%>%select(ID, Name, Period, Value)%>%pivot_wider(names_from =Period, values_from = Value)
   sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
-  #plotclr <- brewer.pal(nclr,"PuOr")
-  #class <- classIntervals(data$Value, nclr, style="quantile", dataPrecision=4)
-  #colcode <- findColours(class, plotclr)
-  #plot(sp,col=colcode)
-  #legend(legend=names(attr(colcode, "table")), fill=attr(colcode, "palette"), cex=0.8, bty="n")
   pal <- brewer.pal(nclr, "OrRd") # we select 7 colors from the palette
   breaks_qt <- classIntervals(data$Value/1000, n = nclr, style = "quantile")
   br <- breaks_qt$brks 
-  # categoreis for choropleth map
   for (i in unique(data$Period)){
     print(i)
     png(file = paste0("map",text,i,".png"), width = w, height = h)
     sp@data$bracket <- cut(sp@data[,i]/1000, breaks_qt$brks)
-    # plot
     print(spplot(sp, "bracket", col.regions=pal,colorkey=FALSE, 
+                 main = paste0("Wartośći ",var," według regionów w roku ",i)))
+    dev.off()
+  }}
+draw_rawY_maps(PL_UE,PL_map,"BEZR_PL","'stopa bezrobocia'",path2,8,400,400)
+draw_rawY_maps(PL_GDP,PL_map,"GDP_PL","'PKB'",path2,8,400,400)
+draw_rawY_maps(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path2,0)
+draw_rawY_maps(USA_GDP,7, 4,"GDP_USA","'PKB'",path2,0)
+
+########################## drawing single maps
+draw_raw_maps<-function(data,map,text,var,p,nclr,w,h,div,kolorki){
+  library(RColorBrewer)
+  library(classInt)
+  setwd(p)
+  #data<-PL_UE
+  #map<-PL_map
+  #nclr<-6
+  pal <- brewer.pal(nclr, kolorki) # we select 7 colors from the palette
+  breaks_qt <- classIntervals(data$Value/div, n = nclr, style = "quantile")
+  br <- breaks_qt$brks 
+  data$Month<-as.character(month(data$Date))
+  data$Year<-as.character(year(data$Date))
+  for (i in unique(data$Year)){
+    d<-data%>%select(ID, Name, Date,Month,Year,Value)%>%filter(Month=="1")%>%filter(Year==i)
+    sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
+    #plotclr <- brewer.pal(nclr,"PuOr")
+    #class <- classIntervals(data$Value, nclr, style="quantile", dataPrecision=4)
+    #colcode <- findColours(class, plotclr)
+    #plot(sp,col=colcode)
+    #legend(legend=names(attr(colcode, "table")), fill=attr(colcode, "palette"), cex=0.8, bty="n")
+    print(i)
+    png(file = paste0("map",text,i,".png"), width = w, height = h)
+    sp@data$bracket <- cut(sp@data$Value/div, breaks_qt$brks)
+    # plot
+    print(spplot(sp, "bracket", col.regions=pal,colorkey=TRUE,par.settings = list(axis.line = list(col =  'transparent')),
                  main = paste0("Wartośći ",var," według regionów w roku ",i)))
     dev.off()
     #ggsave(paste0(p,text,".png"), draw, width = w,height = h, units = "mm")
     #8.27, height = 11.69, units = "in"))
   }}
-draw_rawY_maps(PL_UE,PL_map,"BEZR_PL","'stopa bezrobocia'",path,8,400,400)
-draw_rawY_maps(PL_GDP,PL_map,"GDP_PL","'PKB'",path,8,400,400)
-draw_rawY_maps(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path,0)
-draw_rawY_maps(USA_GDP,7, 4,"GDP_USA","'PKB'",path,0)
+draw_raw_maps(PL_UE,PL_map,"BEZR_PL","'stopa bezrobocia'",path2,8,400,400,1,"PuBuGn")
+draw_raw_maps(PL_GDP,PL_map,"GDP_PL","'PKB'",path2,8,400,400,1000,"OrRd")
+draw_raw_maps(USA_UE,USA_map,"BEZR_USA","'stopa bezrobocia'",path2,8,400,400,1,"PuBuGn")
+draw_raw_maps(USA_GDP,USA_map,"GDP_USA","'PKB'",path2,8,400,400,1,"OrRd")
 
 
-# function which draws the map with colours according to Value for one period
+########################## drawing maps in matrix
+draw_raw_matrixMaps<-function(data,map,var,nclr,div,kolorki,i){
+  library(RColorBrewer)
+  library(classInt)
+  pal <- brewer.pal(nclr, kolorki) # we select 7 colors from the palette
+  breaks_qt <- classIntervals(data$Value/div, n = nclr, style = "quantile")
+  br <- breaks_qt$brks 
+  data$Month<-as.character(month(data$Date))
+  data$Year<-as.character(year(data$Date))
+  d<-data%>%select(ID, Name, Date,Month,Year,Value)%>%filter(Month=="1")%>%filter(Year==i)
+  sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
+  sp@data$bracket <- cut(sp@data$Value/div, breaks_qt$brks)
+  spplot(sp, "bracket", lwd=0.1,col.regions=pal,colorkey=FALSE, main =list(label=paste0(var," w roku ",i),cex=0.8,fontfamily=f),#paste0("Wartośći ",var," według regionów w roku ",i),
+         par.settings = theme.novpadding)
+  }
+
+# choice of folder to keep maps
+setwd(path3)
+## UNEMPLOYMENT RATE IN POLAND
+require(gridExtra)
+temp<-unique(year(PL_UE$Date))
+png(file = paste0("mapM_BEZR_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_UE,PL_map,"'stopa bezrobocia'",8,1,"PuBuGn",.x))
+do.call(grid.arrange,plots)
+dev.off()
+
+## GDP IN POLAND
+require(gridExtra)
+temp<-unique(year(PL_GDP$Date))
+png(file = paste0("mapM_GDP_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_GDP,PL_map,"'PKB'",8,1000,"OrRd",.x))
+do.call(grid.arrange,plots)
+dev.off()
+
+## UNEMPLOYMENT RATE IN USA
+require(gridExtra)
+temp<-unique(year(USA_UE$Date))
+png(file = paste0("mapM_BEZR_USA.png"), width = 8.27, height = 11.69, units ="in",res=300)
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_UE,USA_map,"'stopa bezrobocia'\n",8,1,"PuBuGn",.x))
+do.call(grid.arrange,c(plots, ncol=3))
+dev.off()
+
+## GDP IN USA
+require(gridExtra)
+temp<-unique(year(USA_GDP$Date))
+png(file = paste0("mapM_GDP_USA.png"), width = 8.27, height = 11.69, units ="in",res=300)
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_GDP,USA_map,"'PKB'",8,1000,"OrRd",.x))
+do.call(grid.arrange,plots)
+dev.off()
+
+
+#################### function which draws the map with colours according to Value for one period
 draw_map_variable <- function(map, data, cut, variable, year, title,kolorki) {
   
   data<-filter(data,Period==year)
   sp <- merge(x = map, y = data, by.x = "ID", by.y = "ID")
-  text<-list("sp.text", coordinates(sp), as.character(sp@data$Name),col="black", cex=0.5,font=2)
-  drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
+  text<-list("sp.text", coordinates(sp), as.character(sp@data$Name),col="black", cex=0.5,font=1)
+  drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut) 
                   ,cuts = cut,sp.layout = list(text),do.log=TRUE,
                   par.settings = list(axis.line = list(col =  'transparent')),
-                  main = paste("Wartości",title,"w roku",year))
+                  main = list(label=paste("Podział",title),cex=0.8,fontfamily=f))
+                  #main = paste("Wartości",title,"w roku",year))
   return(drawing)
 }
-draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2018, "GDP",my.palette)
 
-draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2018, "GDP",my.palette)
-
-
-data<-PL_GDP
-map<-PL_map
-drawing<-spplot(sp, zcol = "Value", colorkey = TRUE, col.regions = my.palette#(cut) 
-                ,cuts = cuts,sp.layout = list(text),do.log=TRUE,
-                par.settings = list(axis.line = list(col =  'transparent')),
-                main = paste("Wartości w roku ",2018))
-
+png(file = paste0("map_names_PL.png"), width = 4, height = 4, units ="in",res=300)
+draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2000, "Polski na 73 regiony","white")
+dev.off()
 
 draw_usamap_variable <- function(map, data, cut, variable, year, per, title, kolorki) {
   data$Year<-year(data$Date)
   data$Month<-month(data$Date)
   data<-data%>%filter(Year==year)%>%filter(Month==per)
   sp <- merge(y = data, x = map, by.y = "Name", by.x = "NAME")
-  text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.5,font=2)
-  drawing<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
+  text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.5,font=1.5)
+  drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut) 
                   ,cuts = cut,sp.layout = list(text),do.log=TRUE,
                   par.settings = list(axis.line = list(col =  'transparent')),
-                  main = paste0("Wartości ",title,"w roku ",year," w miesiącu ",per))
+                  main = list(label=title,cex=0.8,fontfamily=f))
+                  #main = paste0("Wartości ",title,"w roku ",year," w miesiącu ",per))
   return(drawing)
 }
+png(file = paste0("map_names_USA.png"), width = 4, height = 4, units ="in",res=300)
+draw_usamap_variable(USA_map, USA_UE, 1, "Value", 2010,1,"Podział USA na 48 stany", "white")
+dev.off()
 
-draw_usamap_variable <- function(map, data, cut, variable, per, title, kolorki) {
-  data$Year<-year(data$Date)
-  data$Month<-month(data$Date)
-  drawing<-list()
-  for (i in 1:length(USA_years)){
-    d<-data%>%filter(Year==(i+1998))%>%filter(Month==per)
-    sp <- merge(y = d, x = map, by.y = "Name", by.x = "NAME")
-    text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.5,font=2)
-    drawing[[i]]<-spplot(sp, zcol = variable, colorkey = TRUE, col.regions = kolorki#(cut) 
-                    ,cuts = cut,sp.layout = list(text),do.log=TRUE,
-                    par.settings = list(axis.line = list(col =  'transparent')),
-                    main = paste0("Wartości ",title," w roku ",i," w miesiącu ",per))}
-  return(drawing)
-}
-s<-draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", 4,"GDP", my.palette)
 
-setwd("~/Desktop/Magisterka/Master_git/output")
-library(graphics)
-png(file = "cos.png", width = 1700, height = 2000, units = "px")
-par(mfrow = c(5, 5))
-for (i in USA_years){
-  print(i)
-  i<-as.numeric(i)
-  draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", i, 4,"GDP", my.palette)
-}
 
-draw_usamap_variable(USA_map, USA_GDP, cuts-1, "Value", 2018,4,"GDP", my.palette)
-draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", 2018,4,"GDP", my.palette)
-
+############ OLD
 op <- par(mfrow=c(3,2)) # funkcja dzielaca obszar roboczy na rzędy i kolumny
 lapply(2005:2018,function(i){
   plot(draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", i, 4,"GDP", my.palette))# funkcja main to tytul wykresu

@@ -17,39 +17,39 @@ par(mfrow = c(1, 1))
 par()
 
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
-draw_raw_maps<-function(data,map,text,var,p,nclr,w,h,div){
+draw_raw_maps<-function(data,map,text,var,p,nclr,w,h,div,kolorki){
       library(RColorBrewer)
       library(classInt)
-      data<-PL_UE
-      map<-PL_map
-      pal <- brewer.pal(nclr, "OrRd") # we select 7 colors from the palette
+      #data<-PL_UE
+      #map<-PL_map
+      #nclr<-6
+      pal <- brewer.pal(nclr, kolorki) # we select 7 colors from the palette
       breaks_qt <- classIntervals(data$Value/1, n = nclr, style = "quantile")
       br <- breaks_qt$brks 
       data$Month<-as.character(month(data$Date))
       data$Year<-as.character(year(data$Date))
       for (i in unique(data$Year)){
-      d<-data%>%select(ID, Name, Date,Month,Year,Value)%>%filter(Month=="1")%>%filter(Year=="2018")
-      sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
+        d<-data%>%select(ID, Name, Date,Month,Year,Value)%>%filter(Month=="1")%>%filter(Year=="2018")
+        sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
       #plotclr <- brewer.pal(nclr,"PuOr")
       #class <- classIntervals(data$Value, nclr, style="quantile", dataPrecision=4)
       #colcode <- findColours(class, plotclr)
       #plot(sp,col=colcode)
       #legend(legend=names(attr(colcode, "table")), fill=attr(colcode, "palette"), cex=0.8, bty="n")
-
         print(i)
         png(file = paste0("map",text,i,".png"), width = w, height = h)
         sp@data$bracket <- cut(sp@data$Value/1, breaks_qt$brks)
         # plot
-        print(spplot(sp, "bracket", col.regions=pal,colorkey=FALSE))
+        print(spplot(sp, "bracket", col.regions=pal,colorkey=FALSE,
                      main = paste0("Wartośći ",var," według regionów w roku ",i)))
         dev.off()
         #ggsave(paste0(p,text,".png"), draw, width = w,height = h, units = "mm")
                  #8.27, height = 11.69, units = "in"))
       }}
-draw_raw_maps(PL_UE,PL_map,"BEZR_PL","'stopa bezrobocia'",path,3,400,400,1)
-draw_raw_maps(PL_GDP,PL_map,"GDP_PL","'PKB'",path,8,400,400)
-draw_raw_maps(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",path,0)
-draw_raw_maps(USA_GDP,7, 4,"GDP_USA","'PKB'",path,0)
+draw_raw_maps(PL_UE,PL_map,"BEZR_PL","'stopa bezrobocia'",path,3,400,400,1,"OrRd")
+draw_raw_maps(PL_GDP,PL_map,"GDP_PL","'PKB'",path,8,400,400,1000,"OrRd")
+draw_raw_maps(USA_UE,USA_map,"BEZR_USA","'stopa bezrobocia'",path,3,400,400,1,"OrRd")
+draw_raw_maps(USA_GDP,USA_map,"GDP_USA","'PKB'",path,3,400,400,1,"OrRd")
 
 
   setwd("~/Desktop/Magisterka/Master_git/raw_maps")

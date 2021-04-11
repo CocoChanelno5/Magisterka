@@ -162,6 +162,8 @@ PL_GDP <- df %>%
     values_to = "Value",
   )
 PL_GDP$Date<-as.Date(PL_GDP$Period,format="%Y")
+month(PL_GDP$Date)<-1
+day(PL_GDP$Date)<-1
 lata<-unique(PL_GDP$Period)
 
 df_change<-select(df_ch,c(ID, Name))
@@ -228,7 +230,7 @@ USA_GDP <- df%>%filter(Description=="All industry total") %>%
     cols = starts_with("2"),
     names_to = "Time",
     values_to = "Value",
-  )%>%select(Name,Time,MEAN,MAX,MIN,Value)
+  )%>%select(ID,Name,Time,MEAN,MAX,MIN,Value)
 
 
 USA_GDP$Time<-gsub("_Q1", "-01-01", USA_GDP$Time)
