@@ -99,18 +99,17 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_"
 ######################### PARAMETRY DLA PL STOPA BEZROBOCIA  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(-0.2, N),
-               mu_0 = rep(-1.3, N),
+               mu_1 = rep(-1.3, N),
+               mu_0 = rep(-0.2, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
 
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 0.4,
-                 m_prior = matrix(c(-1.3,-0.2), nrow = 2),
+                 delta_prior = 10,
+                 m_prior = matrix(c(0.2,-1.3), nrow = 2),
                  M_prior = diag(2))
-
 
 start <- Sys.time()
 posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
@@ -145,8 +144,8 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP_
 ######################### PARAMETRY DLA USA STOPA BEZROBOCIA  ##########
 N <- n_states
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(0.3, N),
-               mu_0 = rep(-0.2, N),
+               mu_1 = rep(-0.2, N),
+               mu_0 = rep(0.3, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
@@ -154,7 +153,7 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(-0.2,0.3), nrow = 2),
+                 m_prior = matrix(c(0.3,-0.2), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -178,18 +177,18 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP"
 
 ########### IF SIMULATION RUN BEFORE, START HERE ###################
 setwd("~/post_simul/")
-posterior.all <- posterior_a
+posterior <- posterior_a
 load(paste0("posterior", format(Sys.time(), "%a %b %d %X %Y"), ".RData"))
-PL_regions
-USA_states
+n<-n_regions
+n<-n_states
 #rm(posterior, Y, cc, end, start, y_names_estim, yy, yyy)
 
 ########### PRIORS for illustration
 attach(hyperpar0)
-sigma_domain <- seq(from = 0, to = max(posterior.all[[1]][,34:49]), by = 0.01)
+sigma_domain <- seq(from = 0, to = max(posterior[,(2*n+2):(3*n+1)]), by = 0.01)
 sigma_prior <- dinvgamma(sigma_domain, shape = v_prior/2, scale = delta_prior/2)
-m1_domain <- seq(from = min(posterior.all[[1]][,2:17]), to = max(posterior.all[[1]][,2:17]), by = 0.01)
-m0_domain <- seq(from = min(posterior.all[[1]][,18:33]), to = max(posterior.all[[1]][,18:33]), by = 0.01)
+m1_domain <- seq(from = min(posterior[,2:(n+1)]), to = max(posterior[,2:(n+1)]), by = 0.01)
+m0_domain <- seq(from = min(posterior[,(n+2):(2*n+1)]), to = max(posterior[,(n+2):(2*n+1)]), by = 0.01)
 m_domain <- seq(from = min(c(m0_domain, m1_domain)), to = max(c(m1_domain, m0_domain)), by = 0.01)
 m1_prior <- dnorm(m_domain, mean = m_prior[2], sd = M_prior[2,2]^0.5)
 m0_prior <- dnorm(m_domain, mean = m_prior[1], sd = M_prior[1,1]^0.5)
@@ -220,58 +219,87 @@ map <- map[order(map$v.order), ]
 
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
 N <- ncol(Y)
+map<-PL_GDP
+map@data$names<-colnames(Y)
 setwd("~/Desktop/Magisterka/Master_git/output")
 n_col<-4
 n_row<-7
+m<- n_col*n_row
+
+draw_m0m1<-function(data,rows, columns,text, variable, country, cex){
+  
+  variable<-'UE'
+  country<-'PL'
+  cex<-1
+  n_col<-4
+  n_row<-7
+  m<- n_col*n_row
+  names<-colnames(Y)
+  N<-length(colnames(Y))
+  pages<-ceiling(N/m)
+for (i in 1:pages){
+  page<-i
 #m1+m0
-png(file = "m1m0.png", width = 1700, height = 1200)
-par(mfrow = c(n_row, n_col))
-starting.point <- 1
-starting.point.2 <- N
-for (pp in 1:N) {
-  hist(posterior.all[[1]][,starting.point + pp], freq = FALSE, main = map$names[pp], 
-       xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
-       xlim = c(min(m_domain), max(m_domain)), ylim = c(0,1.5), cex.main = 3, cex.axis = 3)
-  hist(posterior.all[[1]][,starting.point.2 + pp], freq = FALSE, main = map$names[pp], 
-       xlab = NULL, ylab = NULL, nclass = 20, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
-       xlim = c(min(m_domain), max(m_domain)), ylim = c(0,1.5), cex.main = 3, cex.axis = 3, add = TRUE)
-  lines(x=m_domain, y=m1_prior, lwd = 2, col = "grey")
-  lines(x=m_domain, y=m0_prior, lwd = 2, col = "pink")
-  legend(x="topleft", legend = c("m1 a priori", "m1 a posteriori", "m0 a priori", "m0 a posteriori"), 
-         fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1), "pink", rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
-         bty = "n", cex = 2)
+  png(file = paste0("m1m0_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+  par(mfrow = c(n_row, n_col),family="mono",mar=c(3, 1, 2, 1)+ 0.1)
+  starting.point <- 1
+  starting.point.2 <- N
+  for (pp in 1:m) {
+    pp<-pp+(page-1)*m
+    hist(posterior[,starting.point + pp], freq = FALSE, main = colnames(Y)[pp], 
+         xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
+         xlim = c(min(m_domain), max(m_domain)), #ylim = c(0,1.5), 
+         cex.main = cex, cex.axis = cex/1.5)
+    hist(posterior[,starting.point.2 + pp], freq = FALSE, main = colnames(Y)[pp], 
+         xlab = NULL, ylab = NULL, nclass = 20, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
+         xlim = c(min(m_domain), max(m_domain)), #ylim = c(0,1.5), 
+         cex.main = cex, cex.axis = cex/1.5, add = TRUE)
+    lines(x=m_domain, y=m1_prior, lwd = 2, col = "grey")
+    lines(x=m_domain, y=m0_prior, lwd = 2, col = main_colour2)
+    legend(x="topleft", legend = c("m1 a priori", "m1 a posteriori", "m0 a priori", "m0 a posteriori"), 
+           fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1), main_colour2, rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
+           bty = "n", cex = cex/1.5)
+  }
+  dev.off()
 }
-dev.off()
 
-#p11+p00
-png(file = "p11p00.png", width = 1700, height = 1200)
-par(mfrow = c(4, 4))
-starting.point <- 65
-starting.point.2 <- 49
-for (pp in 1:N) {
-  hist(posterior.all[[1]][,starting.point + pp], freq = FALSE, main = map$names[pp], 
-       xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
-       xlim = c(min(p_domain), max(p_domain)), ylim = c(0, 8), cex.main = 3, cex.axis = 3)
-  hist(posterior.all[[1]][,starting.point.2 + pp], freq = FALSE, main = map$names[pp], 
-       xlab = NULL, ylab = NULL, nclass = 20, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
-       xlim = c(min(p_domain), max(p_domain)), ylim = c(0, 8), add = TRUE, cex.main = 3, cex.axis = 3)
-  lines(x=p_domain, y=p11_prior, lwd = 2, col = "grey")
-  lines(x=p_domain, y=p00_prior, lwd = 2, col = "pink")
-  legend(x="topleft", legend = c("p11 a priori", "p11 a posteriori", "p00 a priori", "p00 a posteriori"), 
-         fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1), "pink", rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
-         bty = "n", cex = 2)
+for (i in 1:pages){
+  page<-i
+  #p11+p00
+  png(file = paste0("p1p0_",country,variable,"_",page,".png"), width = 8.27, 
+        height = 11.69, units ="in", res=300)
+  par(mfrow = c(n_row, n_col),family="mono",mar=c(3, 1, 2, 1)+ 0.1)
+  starting.point <- 4*n
+  starting.point.2 <- 3*n
+  for (pp in 1:m) {
+    pp<-pp+(page-1)*m
+    hist(posterior[,starting.point + pp], freq = FALSE, main = names[pp], 
+           xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
+           xlim = c(min(p_domain), max(p_domain)), #ylim = c(0, 8), 
+           cex.main = cex, cex.axis = cex/1.5)
+    hist(posterior[,starting.point.2 + pp], freq = FALSE, main = names[pp], 
+           xlab = NULL, ylab = NULL, nclass = 20, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
+           xlim = c(min(p_domain), max(p_domain)), #ylim = c(0, 8), 
+           add = TRUE, cex.main = cex, cex.axis = cex/1.5)
+    lines(x=p_domain, y=p11_prior, lwd = 2, col = "grey")
+    lines(x=p_domain, y=p00_prior, lwd = 2, col = main_colour2)
+    legend(x="topleft", legend = c("p11 a priori", "p11 a posteriori", "p00 a priori", "p00 a posteriori"), 
+             fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1), main_colour2, rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
+             bty = "n", cex = cex/1.5)
+      }
+  dev.off()
 }
-dev.off()
 
+title="Stopa bezrobocia w Polsce"
 #rho
 png(file = "rho.png", width = 400, height = 400)
-hist(posterior.all[[1]][,1], freq = FALSE, main = "Polska", 
+hist(posterior[,1], freq = FALSE, main = title, 
      xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
-     xlim = c(lowerbound_rho2, 1), ylim = c(0, 15), cex.main = 2, cex.axis = 2)
+     xlim = c(lowerbound_rho2, 1), ylim = c(0, 15), cex.main = cex, cex.axis = cex/2)
 lines(x = rho_domain, y = rho_prior, lwd = 2, col = "grey")
 legend(x = "topleft", legend = c("rho a priori", "rho a posteriori"), 
        fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1)), 
-       bty = "n", cex = 1.5)
+       bty = "n", cex = cex/2)
 dev.off()
 
 ############# TABLES #######################
@@ -280,7 +308,7 @@ colnames(rho.sum) <- c("post mean", "post SD", "HPDI 95 L", "HPDI 95 U")
 y_names_PL <- c("OGӣEM", "przetw?rstwo przemys?owe (C)", "budownictwo (F)", "gospodarka wodna (E)", "handel (G)", "transport (H)", "gospodarka nieruchomo?ciami (L)")
 rownames(rho.sum) <- y_names_PL
 for (yyy in 1:1) {      #tu zmieni?!!!! jak si? b??d wyja?ni
-  post <- posterior.all[[yyy]]
+  post <- posterior[[yyy]]
   post.sum <- matrix(NA, nrow = 4, ncol = ncol(post))
   post.sum[1,] <- colMeans(post)
   post.sum[2,] <- vapply(post, 2, FUN = sd)

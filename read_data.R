@@ -219,9 +219,9 @@ var(USA_GDP_ch$Value)       # 14.03696
 #    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 # -21.004   1.668   3.470   3.095   5.019  27.639
 
-df$MEAN<-rowMeans(df[,5:ncol(df)],na.rm=TRUE)
-df$MIN<-apply(df[,5:ncol(df)],1,FUN=min,na.rm=TRUE)
-df$MAX<-apply(df[,5:ncol(df)],1,FUN=max,na.rm=TRUE)
+df$MEAN<-rowMeans(df[,4:ncol(df)],na.rm=TRUE)
+df$MIN<-apply(df[,4:ncol(df)],1,FUN=min,na.rm=TRUE)
+df$MAX<-apply(df[,4:ncol(df)],1,FUN=max,na.rm=TRUE)
 
 
 ## level

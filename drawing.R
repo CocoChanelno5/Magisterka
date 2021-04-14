@@ -1,3 +1,12 @@
+install.packages("extrafont")
+library(extrafont)
+font_import(pattern = "lmodern*")
+
+
+# Run each time
+library(extrafont)
+loadfonts(device = "win")
+
 theme.novpadding <-
   list(axis.line = 
          list(col =  'transparent'),
@@ -43,12 +52,12 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point, d
   m<-r*c
   count<-0
   name_list<-list()
-  for (i in seq(1,N,28)){
+  for (i in seq(1,N,m)){
     count<-count+1
-    if (i+r*c-1>N){
+    if (i+m-1>N){
       name_list[[count]]<-unique(data$Name)[i:N]
     }else{
-      name_list[[count]]<-unique(data$Name)[i:(i+r*c-1)]
+      name_list[[count]]<-unique(data$Name)[i:(i+m-1)]
     }
   }
   #data<-PL_GDP
@@ -100,8 +109,8 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point, d
                     geom_hline(aes(yintercept=mean(MEAN)/div), color=main_colour2, size=.5,alpha = 1/2,linetype = "dashed")+
                     geom_vline(aes(xintercept = DATE_MIN,group=Name),color="grey", size=1,alpha = 1/2)+
                     geom_vline(aes(xintercept = DATE_MAX,group=Name),color="grey", size=1,alpha = 1/2)+
-                    theme(plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 15),
-                          axis.text = element_text(size = 0.05, angle=50))+
+                    theme(strip.text = element_text(family = f),plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 15,family = f),
+                          axis.text = element_text(size = 0.05, angle=50,family = f))+
                     scale_y_continuous(name="Wartość opisywanej zmiennej")
           plot(draw)
           ggsave(paste0(dir,i,text,".png"), draw, width = 8.27, height = 11.69, units = "in")
