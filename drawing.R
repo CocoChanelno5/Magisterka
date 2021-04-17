@@ -1,8 +1,6 @@
 install.packages("extrafont")
 library(extrafont)
 font_import(pattern = "lmodern*")
-
-
 # Run each time
 library(extrafont)
 loadfonts(device = "win")
@@ -26,7 +24,7 @@ theme.novpadding <-
               right.padding = 0))
 par(mfrow=c(5,2))
 par()
-f<-"Arial"
+f<-"Times"
 ################### DRAWING MAPS WITH DATA #####################
 #illustrate variable http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf?utm_source=twitterfeed&utm_medium=twitter
 main_colour <- "navy"
@@ -103,15 +101,16 @@ draw_timelines_matrix<-function(data,rows, columns,text, variable, dir, point, d
                     #annotate(geom="text", x=as.Date("2017-01-01"), y=20089, label="Bitcoin price reached 20k $\nat the end of 2017") +
                     #annotate(geom="point", x=as.Date("2017-12-17"), y=20089, size=10, shape=21, fill="transparent") +
                     #scale_x_date(limit=c(as.Date("2017-01-01"),as.Date("2017-02-11")))
-                    ggtitle(paste0("Poziom zmiennej ",variable," w "))+
+                    #ggtitle(paste0("Poziom zmiennej ",variable," w "))+
                     facet_wrap(~Name, ncol=c, nrow=r,scales = "free_y")+
                     geom_hline(aes(yintercept=MEAN/div, group=Name), color=main_colour2, size=.5)+
                     geom_hline(aes(yintercept=mean(MEAN)/div), color=main_colour2, size=.5,alpha = 1/2,linetype = "dashed")+
                     geom_vline(aes(xintercept = DATE_MIN,group=Name),color="grey", size=1,alpha = 1/2)+
                     geom_vline(aes(xintercept = DATE_MAX,group=Name),color="grey", size=1,alpha = 1/2)+
-                    theme(strip.text = element_text(family = f),plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 15,family = f),
-                          axis.text = element_text(size = 0.05, angle=50,family = f))+
-                    scale_y_continuous(name="Wartość opisywanej zmiennej")
+                    scale_y_continuous(name=" ")+
+                    theme(strip.text = element_text(family = f,size = 10),plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 15,family = f),
+                          axis.text = element_text(size = 0.05, angle=50,family = f))
+                    
           plot(draw)
           ggsave(paste0(dir,i,text,".png"), draw, width = 8.27, height = 11.69, units = "in")
   }
@@ -196,7 +195,7 @@ draw_raw_matrixMaps<-function(data,map,var,nclr,div,kolorki,i){
   d<-data%>%select(ID, Name, Date,Month,Year,Value)%>%filter(Month=="1")%>%filter(Year==i)
   sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
   sp@data$bracket <- cut(sp@data$Value/div, breaks_qt$brks)
-  spplot(sp, "bracket", lwd=0.1,col.regions=pal,colorkey=FALSE, main =list(label=paste0(var," w roku ",i),cex=0.8,fontfamily=f),#paste0("Wartośći ",var," według regionów w roku ",i),
+  spplot(sp, "bracket", lwd=0.1,col.regions=pal,colorkey=FALSE, main =list(label=i,cex=0.8,fontfamily=f),#paste0("Wartośći ",var," według regionów w roku ",i),
          par.settings = theme.novpadding)
   }
 
@@ -206,31 +205,28 @@ setwd(path3)
 require(gridExtra)
 temp<-unique(year(PL_UE$Date))
 png(file = paste0("mapM_BEZR_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
-plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_UE,PL_map,"'stopa bezrobocia'",8,1,"PuBuGn",.x))
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_UE,PL_map,"'stopa bezrobocia'",8,1,"OrRd",.x))
 do.call(grid.arrange,plots)
 dev.off()
 
 ## GDP IN POLAND
-require(gridExtra)
 temp<-unique(year(PL_GDP$Date))
 png(file = paste0("mapM_GDP_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
-plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_GDP,PL_map,"'PKB'",8,1000,"OrRd",.x))
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_GDP,PL_map,"'PKB'",8,1000,"PuBuGn",.x))
 do.call(grid.arrange,plots)
 dev.off()
 
 ## UNEMPLOYMENT RATE IN USA
-require(gridExtra)
 temp<-unique(year(USA_UE$Date))
 png(file = paste0("mapM_BEZR_USA.png"), width = 8.27, height = 11.69, units ="in",res=300)
-plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_UE,USA_map,"'stopa bezrobocia'\n",8,1,"PuBuGn",.x))
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_UE,USA_map,"'stopa bezrobocia'\n",8,1,"OrRd",.x))
 do.call(grid.arrange,c(plots, ncol=3))
 dev.off()
 
 ## GDP IN USA
-require(gridExtra)
 temp<-unique(year(USA_GDP$Date))
 png(file = paste0("mapM_GDP_USA.png"), width = 8.27, height = 11.69, units ="in",res=300)
-plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_GDP,USA_map,"'PKB'",8,1000,"OrRd",.x))
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_GDP,USA_map,"'PKB'",8,1000,"PuBuGn",.x))
 do.call(grid.arrange,plots)
 dev.off()
 
