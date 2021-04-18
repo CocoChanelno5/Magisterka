@@ -18,6 +18,8 @@ library(lubridate)
 library(gridExtra)
 library(stringr)
 library(zoo)
+library(RColorBrewer)
+library(classInt)
 setwd("~/Desktop/Magisterka/Master_git")
 
 ############## FUNCTIONS ####################

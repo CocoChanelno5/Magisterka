@@ -1,20 +1,13 @@
 ############## COMMENTS ####################
-
+# order of regions
+order_idusa<-colnames(W_USA)
+order_idpl<-colnames(W_PL)
+W_list <- mat2listw(W, style="W")
+rm(gamma)
 ### REGIMES
 # 1 - EXPANSION
 # 0 - RECESSION
 set.seed(42)
-
-setwd("~/Desktop/Magisterka/Master_git")
-source("MC_MG_HF_functions.R")
-
-# order of regions
-order_idusa<-colnames(W_USA)
-order_idpl<-colnames(W_PL)
-
-W_list <- mat2listw(W, style="W")
-rm(gamma)
-
 # the loop through all files makes the posterior estimation
 posterior_a <- list()
 # preparing matryx Y for GDP in Poland
@@ -39,7 +32,7 @@ table(is.na(Y))
 
 ## preparing matryx Y for unemployment rate in USA
 dftemp<-USA_UE_ch
-Y<-dftemp%>% select(c(Name,Period, Value)) %>% pivot_wider(names_from = Name,values_from = Value)
+Y<-dftemp%>% select(c(Name,Date, Value)) %>% pivot_wider(names_from = Name,values_from = Value)
 Y <- as.matrix(Y[,-1])
 W<-W_USA
 table(is.na(Y))
@@ -333,7 +326,7 @@ post2 <- cbind(t(post.sum[,(n+2):(2*n+1)]),
               t(post.sum[,(2*n+2):(3*n+1)]))
 rownames(post2) <- names
 colnames(post2) <- paste0(rep(c("m0", "m1", "p00", "p01", "sigma"), each = 4), " ", rep(c("post mean", "post SD", "HPDI 95 L", "HPDI 95 U"), 5))
-post2 <- round(post2,2)
+post2 <- round(post2,3)
 write.table(post2, file = paste0(country,variable, "_results.csv"), sep = ";", dec = ",")
 rho.sum <- post.sum[,1]
 
@@ -363,47 +356,63 @@ for (i in 1:pages){
 }
 
 #pal <- colorRampPalette(c("white", main_colour2), bias = 1)
-nclr<-9
+
+
+nclr<-5
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 
 draw_impulse<-function(map,N,theta,W,i){
-  nclr<-9
+  nclr<-5
   impulse <- theta$mu_1 - theta$mu_0
   pal <- brewer.pal(nclr, "PuBuGn") # we select 7 colors from the palette
   #sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
   impulse2 <- as.matrix(rep(0,N))
-  print(i)
+  #print(i)
   impulse2[i] <- impulse[i]
-  print(impulse2)
+  #print(impulse)
   effect <- solve(diag(N) - theta$rho * W) %*% impulse2
-  print(effect)
+  #print(effect)
   breaks_qt <- classIntervals(effect, n = nclr, style = "quantile")
   r <- breaks_qt$brks 
   map@data$response <- as.vector(effect)
-  map@data$bracket <- cut(map@data$response, breaks_qt$brks)
-  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=TRUE,
+  map@data$bracket <- cut(map@data$response, r)
+  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=FALSE,
            par.settings = list(axis.line = list(col =  'transparent')),
            main = list(label=i,cex=0.8,fontfamily="serif"))
 }
-impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
+
 e<-c()
 for (pp in 1:N) {
   impulse2 <- as.matrix(rep(0,N))
   impulse2[pp] <- impulse[pp]
   effect <- solve(diag(N) - theta_posterior_means$rho * W) %*% impulse2
-  e<-cbind(e,effect)
-  map@data$response <- as.vector(effect)}
+  e<-cbind(e,effect)}
 effect_mean<-mean(effect)
-
+breaks_qt <- classIntervals(e, n = nclr, style = "quantile")
+r <- breaks_qt$brks 
 # choice of folder to keep maps
+n_col<-3
+n_row<-5
+m<- n_col*n_row
+names<-colnames(Y)
+N<-length(colnames(Y))
+pages<-ceiling(N/m)
 setwd(path3)
 ## UNEMPLOYMENT RATE IN POLAND
-for (page in 1:1){
+for (page in 1:pages){
+  if ((m+(page-1)*m)>N){
+    temp<-seq(1+(page-1)*m,N)
+    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+    plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,.x))
+    do.call(grid.arrange,plots)
+    dev.off()
+  }else{
   temp<-seq(1+(page-1)*m,m+(page-1)*m)
   png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
   plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,.x))
   do.call(grid.arrange,plots)
   dev.off()
+  }
 }
 
 write.table(rho.sum, file = "rho_results.csv", sep = ";", dec = ",")
