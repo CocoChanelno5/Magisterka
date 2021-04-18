@@ -184,6 +184,9 @@ n<-n_regions
 #rm(posterior, Y, cc, end, start, y_names_estim, yy, yyy)
 
 ########### PRIORS for illustration
+posterior <- posterior_a
+n<-n_regions
+#n<-n_states
 setwd("~/Desktop/Magisterka/Master_git/output")
 attach(hyperpar0)
 sigma_domain <- seq(from = 0, to = max(posterior[,(2*n+2):(3*n+1)]), by = 0.01)
@@ -226,7 +229,7 @@ for (i in 1:pages){
   page<-i
 #m1+m0
   png(file = paste0("m1m0_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-  par(mfrow = c(n_row, n_col),family="mono",mar=c(3, 1, 2, 1)+ 0.1)
+  par(mfrow = c(n_row, n_col), family="serif",mar=c(3, 1, 2, 1)+ 0.1)
   for (pp in 1:m) {
     pp<-pp+(page-1)*m
     if (pp<=N){    
@@ -270,16 +273,16 @@ for (i in 1:pages){
   #p11+p00
   png(file = paste0("p1p0_",country,variable,"_",page,".png"), width = 8.27, 
         height = 11.69, units ="in", res=300)
-  par(mfrow = c(n_row, n_col),family="mono",mar=c(3, 1, 2, 1)+ 0.1)
+  par(mfrow = c(n_row, n_col),family="serif",mar=c(3, 1, 2, 1)+ 0.1)
   for (pp in 1:m) {
     pp<-pp+(page-1)*m
     if (pp<=N){
     hist(v_p1[,pp], freq = FALSE, main = names[pp], 
-           xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
+           xlab = NULL, ylab = NULL, nclass = 10, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
            xlim = c(min(p_domain), max(p_domain)), #ylim = c(0, 8), 
            cex.main = cex, cex.axis = cex/1.5)
     hist(v_p0[,pp], freq = FALSE, main = names[pp], 
-           xlab = NULL, ylab = NULL, nclass = 20, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
+           xlab = NULL, ylab = NULL, nclass = 10, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
            xlim = c(min(p_domain), max(p_domain)), #ylim = c(0, 8), 
            add = TRUE, cex.main = cex, cex.axis = cex/1.5)
     lines(x=p_domain, y=p11_prior, lwd = 2, col = "grey")
@@ -342,27 +345,65 @@ theta_posterior_means <- list(rho = post.sum[1,1],
                                 p_11 = as.vector(post2[,13]))
 p_Hamilton <- Hamilton_filter(Y, theta_posterior_means, W)
 p_Hamilton <- p_Hamilton$p_1
-  
-png(file = paste0("Hamilton_", country,variable, ".png"), width = 1800, height = 1000)
-par(mfrow = c(4,4))
-dates<-unique(PL_UE_ch$Period)
-for (pp in 1:N) {
-  plot(x=1:110, y=p_Hamilton[,pp],type="l",lwd=2,xlab="",
+
+
+for (i in 1:pages){
+  page<-i
+  png(file = paste0("Hamilton_", country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+  par(mfrow = c(n_row, n_col), family="serif",mar=c(3, 1, 2, 1)+ 0.1)
+  dates<-unique(PL_UE_ch$Period)
+  for (pp in 1:m) {
+    pp<-pp+(page-1)*m
+    if (pp<=N){ 
+        plot(x=1:length(dates), y=p_Hamilton[,pp],type="l",lwd=2,xlab="",
         ylab="p-stwo ekspansji",main=names[pp],
         cex.axis=cex,cex.main=cex,cex.lab=cex)
+      }}
+  dev.off()
 }
-dev.off()
-  
+
+#pal <- colorRampPalette(c("white", main_colour2), bias = 1)
+nclr<-9
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
-pal <- colorRampPalette(c("white", "black"), bias = 1)
-map<-PL_map
+
+draw_impulse<-function(map,N,theta,W,i){
+  nclr<-9
+  impulse <- theta$mu_1 - theta$mu_0
+  pal <- brewer.pal(nclr, "PuBuGn") # we select 7 colors from the palette
+  #sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
+  impulse2 <- as.matrix(rep(0,N))
+  print(i)
+  impulse2[i] <- impulse[i]
+  print(impulse2)
+  effect <- solve(diag(N) - theta$rho * W) %*% impulse2
+  print(effect)
+  breaks_qt <- classIntervals(effect, n = nclr, style = "quantile")
+  r <- breaks_qt$brks 
+  map@data$response <- as.vector(effect)
+  map@data$bracket <- cut(map@data$response, breaks_qt$brks)
+  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=TRUE,
+           par.settings = list(axis.line = list(col =  'transparent')),
+           main = list(label=i,cex=0.8,fontfamily="serif"))
+}
+impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
+e<-c()
 for (pp in 1:N) {
   impulse2 <- as.matrix(rep(0,N))
   impulse2[pp] <- impulse[pp]
   effect <- solve(diag(N) - theta_posterior_means$rho * W) %*% impulse2
-  map@data$response <- as.vector(effect)
-  sp<-spplot(map, zcol = "response", colorkey = TRUE, col.regions = pal(100), cuts = 99,
-           par.settings = list(axis.line = list(col =  'transparent')),
-           main = names[pp])
+  e<-cbind(e,effect)
+  map@data$response <- as.vector(effect)}
+effect_mean<-mean(effect)
+
+# choice of folder to keep maps
+setwd(path3)
+## UNEMPLOYMENT RATE IN POLAND
+for (page in 1:1){
+  temp<-seq(1+(page-1)*m,m+(page-1)*m)
+  png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+  plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,.x))
+  do.call(grid.arrange,plots)
+  dev.off()
 }
+
 write.table(rho.sum, file = "rho_results.csv", sep = ";", dec = ",")
