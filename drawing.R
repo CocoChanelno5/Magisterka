@@ -185,8 +185,7 @@ draw_raw_maps(USA_GDP,USA_map,"GDP_USA","'PKB'",path2,8,400,400,1,"OrRd")
 
 ########################## drawing maps in matrix
 draw_raw_matrixMaps<-function(data,map,var,nclr,div,kolorki,i){
-  library(RColorBrewer)
-  library(classInt)
+  
   pal <- brewer.pal(nclr, kolorki) # we select 7 colors from the palette
   breaks_qt <- classIntervals(data$Value/div, n = nclr, style = "quantile")
   br <- breaks_qt$brks 
@@ -268,7 +267,62 @@ dev.off()
 
 
 
+###############3
+nclr<-9
+e<-c()
+impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
+for (pp in 1:N) {
+  impulse2 <- as.matrix(rep(0,N))
+  impulse2[pp] <- impulse[pp]
+  effect <- solve(diag(N) - theta_posterior_means$rho * W) %*% impulse2
+  e<-cbind(e,effect)}
+effect_mean<-mean(e)
+vec_e<-c(e)
+breaks_qt <- classIntervals(round(vec_e,2), n = nclr, style = "quantile")
+r <- breaks_qt$brks 
+# choice of folder to keep maps
+n_col<-3
+n_row<-5
+m<- n_col*n_row
+names<-colnames(Y)
+N<-length(colnames(Y))
+pages<-ceiling(N/m)
+draw_impulse2<-function(map,N,n,theta,W,ef,r,i){
+  #pp<-1
+  #theta<-theta_posterior_means
+  nclr<-9
+  #pal <- colorRampPalette(c("white", "black"), bias = 1)
+  impulse <- theta$mu_1 - theta$mu_0
+  pal <- brewer.pal(nclr, "PuBuGn")
+  impulse2 <- as.matrix(rep(0,N))
+  impulse2[i] <- impulse[i]
+  map@data$response <- as.vector(ef[,i])
+  map@data$bracket <- cut(map@data$response, r)
+  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=FALSE,
+         par.settings = list(axis.line = list(col =  'transparent')),
+         main = list(label=n[i],cex=0.8,fontfamily="serif"))
+}
+setwd(path3)
+## UNEMPLOYMENT RATE IN POLAND
+for (page in 1:pages){
+  if ((m+(page-1)*m)>N){
+    temp<-seq(1+(page-1)*m,N)
+    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,.x))
+    do.call(grid.arrange,plots)
+    dev.off()
+  }else{
+    temp<-seq(1+(page-1)*m,m+(page-1)*m)
+    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,.x))
+    do.call(grid.arrange,plots)
+    dev.off()
+  }
+}
+
+
 ############ OLD
+
 op <- par(mfrow=c(3,2)) # funkcja dzielaca obszar roboczy na rzędy i kolumny
 lapply(2005:2018,function(i){
   plot(draw_usamap_variable(USA_map, USA_UE, cuts-1, "Value", i, 4,"GDP", my.palette))# funkcja main to tytul wykresu

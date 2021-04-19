@@ -1,13 +1,9 @@
 ############## COMMENTS ####################
-# order of regions
-order_idusa<-colnames(W_USA)
-order_idpl<-colnames(W_PL)
-W_list <- mat2listw(W, style="W")
-rm(gamma)
 ### REGIMES
 # 1 - EXPANSION
 # 0 - RECESSION
 set.seed(42)
+
 # the loop through all files makes the posterior estimation
 posterior_a <- list()
 # preparing matryx Y for GDP in Poland
@@ -145,8 +141,8 @@ theta0 <- list(rho = 0.5,
 
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 0.4,
-                 m_prior = matrix(c(0.3,-0.2), nrow = 2),
+                 delta_prior = 8,
+                 m_prior = matrix(c(0.5,-1), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -169,9 +165,8 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP"
 #save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_UE", format(Sys.time(), "%b%d"), ".RData"))
 
 ########### IF SIMULATION RUN BEFORE, START HERE ###################
-setwd("~/post_simul/")
+
 posterior <- posterior_a
-load(paste0("posterior", format(Sys.time(), "%a %b %d %X %Y"), ".RData"))
 n<-n_regions
 #n<-n_states
 #rm(posterior, Y, cc, end, start, y_names_estim, yy, yyy)
@@ -241,24 +236,6 @@ for (i in 1:pages){
              bty = "n", cex = cex/1.5)}}
   dev.off()
 }
-page<-0
-for (i in seq(1,N,m)){
-  page<-page+1
-  i=1
-  df<-cbind(Name=names[i:(i+m-1)],t(v_p1[,i:(i+m-1)]))
-  draw<-ggplot(df,aes(group=Name)) +
-    geom_histogram(color="black", fill="white")+
-    geom_line(color=main_colour) +
-    theme_ipsum() +
-    ggtitle(paste0("Poziom zmiennej ",variable," w "))+
-    facet_wrap(~Name, ncol=n_col, nrow=n_row,scales = "free_y")+
-    theme(strip.text = element_text(family = f),plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 15,family = f),
-          axis.text = element_text(size = 0.05, angle=50,family = f))+
-    scale_y_continuous(name="Wartość opisywanej zmiennej")
-  plot(draw)
-  ggsave(paste0("p1p0_",country,variable,"_",page,".png"), draw, width = 8.27, height = 11.69, units = "in")
-}
-
 
   ### ILLUSTRATE P
 for (i in 1:pages){
@@ -361,7 +338,7 @@ for (i in 1:pages){
 nclr<-5
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 
-draw_impulse<-function(map,N,theta,W,i){
+draw_impulse<-function(map,N,theta,W,n,i){
   nclr<-5
   impulse <- theta$mu_1 - theta$mu_0
   pal <- brewer.pal(nclr, "PuBuGn") # we select 7 colors from the palette
@@ -376,43 +353,33 @@ draw_impulse<-function(map,N,theta,W,i){
   r <- breaks_qt$brks 
   map@data$response <- as.vector(effect)
   map@data$bracket <- cut(map@data$response, r)
-  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=FALSE,
+  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=TRUE,
            par.settings = list(axis.line = list(col =  'transparent')),
-           main = list(label=i,cex=0.8,fontfamily="serif"))
+           main = list(label=n[i],cex=0.8,fontfamily="serif"))
 }
-
-e<-c()
-for (pp in 1:N) {
-  impulse2 <- as.matrix(rep(0,N))
-  impulse2[pp] <- impulse[pp]
-  effect <- solve(diag(N) - theta_posterior_means$rho * W) %*% impulse2
-  e<-cbind(e,effect)}
-effect_mean<-mean(effect)
-breaks_qt <- classIntervals(e, n = nclr, style = "quantile")
-r <- breaks_qt$brks 
-# choice of folder to keep maps
-n_col<-3
-n_row<-5
+# choice of folder to keep maps 
+n_col<-2
+n_row<-3
 m<- n_col*n_row
 names<-colnames(Y)
 N<-length(colnames(Y))
 pages<-ceiling(N/m)
-setwd(path3)
+#setwd(path3)
 ## UNEMPLOYMENT RATE IN POLAND
 for (page in 1:pages){
   if ((m+(page-1)*m)>N){
     temp<-seq(1+(page-1)*m,N)
     png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,.x))
+    plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,names,.x))
     do.call(grid.arrange,plots)
     dev.off()
   }else{
   temp<-seq(1+(page-1)*m,m+(page-1)*m)
   png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-  plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,.x))
+  plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,names,.x))
   do.call(grid.arrange,plots)
   dev.off()
   }
 }
 
-write.table(rho.sum, file = "rho_results.csv", sep = ";", dec = ",")
+write.table(rho.sum, file = paste0("rho_results_",country,"_",variable,".csv"), sep = ";", dec = ",")

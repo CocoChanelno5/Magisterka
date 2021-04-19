@@ -152,8 +152,8 @@ theta0 <- list(rho = 0.5,
 
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 0.4,
-                 m_prior = matrix(c(0.3,-0.2), nrow = 2),
+                 delta_prior = 8,
+                 m_prior = matrix(c(0.5,-1), nrow = 2),
                  M_prior = diag(2))
 
 
