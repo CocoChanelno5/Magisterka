@@ -17,7 +17,7 @@ theme.novpadding <-
               key.sub.padding = 1,
               bottom.padding = 1),
        layout.widths =
-         list(left.padding = 0,
+         list(left.padding = 1,
               key.ylab.padding = 0,
               ylab.axis.padding = 0,
               axis.key.padding = 0,
@@ -38,7 +38,7 @@ cuts <- 9
 my.palette <- brewer.pal(n = cuts, name = "OrRd")
 # controling breaks
 #library(classInt)
-breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
+#breaks.qt <- classIntervals(palo_alto$PrCpInc, n = 6, style = "quantile", intervalClosure = "right")
 
 #############################################
 file1<-"~/Desktop/Magisterka/Master_git/output/level"
@@ -268,7 +268,7 @@ dev.off()
 
 
 ###############3
-nclr<-9
+nclr<-10
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -278,27 +278,28 @@ for (pp in 1:N) {
   e<-cbind(e,effect)}
 effect_mean<-mean(e)
 vec_e<-c(e)
-breaks_qt <- classIntervals(round(vec_e,2), n = nclr, style = "quantile")
+breaks_qt <- classIntervals(vec_e,2, n = nclr, style = "equal")
 r <- breaks_qt$brks 
 # choice of folder to keep maps
 n_col<-3
 n_row<-5
 m<- n_col*n_row
-names<-colnames(Y)
-N<-length(colnames(Y))
 pages<-ceiling(N/m)
-draw_impulse2<-function(map,N,n,theta,W,ef,r,i){
+pal<-c()
+draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   #pp<-1
   #theta<-theta_posterior_means
   nclr<-9
   #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(nclr, "PuBuGn")
+  pal[1:7] <- brewer.pal(7, "PuBuGn")
+  pal<-rev(pal)
+  pal[8:10] <- brewer.pal(4, "Oranges")[2:4]
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
   map@data$bracket <- cut(map@data$response, r)
-  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=FALSE,
+  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=legend,
          par.settings = list(axis.line = list(col =  'transparent')),
          main = list(label=n[i],cex=0.8,fontfamily="serif"))
 }
@@ -308,13 +309,13 @@ for (page in 1:pages){
   if ((m+(page-1)*m)>N){
     temp<-seq(1+(page-1)*m,N)
     png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,.x))
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,FALSE,.x))
     do.call(grid.arrange,plots)
     dev.off()
   }else{
     temp<-seq(1+(page-1)*m,m+(page-1)*m)
     png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,.x))
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,FALSE,.x))
     do.call(grid.arrange,plots)
     dev.off()
   }

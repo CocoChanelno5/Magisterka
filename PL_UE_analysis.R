@@ -18,7 +18,6 @@ Y<-dftemp%>% select(c(Name,Period, Value)) %>% pivot_wider(names_from = Name,val
 Y <- as.matrix(Y[,-1])
 W<-W_PL
 table(is.na(Y))
-
 # preparing matryx Y for GDP in USA
 dftemp<-USA_GDP_ch
 Y<-dftemp%>% select(c(ID,Period, Value)) %>% pivot_wider(names_from = ID,values_from = Value)
@@ -217,23 +216,23 @@ for (i in 1:pages){
   page<-i
 #m1+m0
   png(file = paste0("m1m0_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-  par(mfrow = c(n_row, n_col), family="serif",mar=c(3, 1, 2, 1)+ 0.1)
+  par(mfrow = c(n_row, n_col), family="serif",mar=c(3, 2, 2, 0)+ 0.1,mgp=c(1.5,0.2,0))
   for (pp in 1:m) {
     pp<-pp+(page-1)*m
     if (pp<=N){    
-      hist(v_m1[,pp], freq = FALSE, main = colnames(Y)[pp], 
-          xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
+      hist(v_m1[,pp], freq = FALSE, main = colnames(Y)[pp], border=rgb(1, 1, 1, 0, maxColorValue = 1),
+          xlab = NULL, ylab = NULL, nclass = 20, col="skyblue4",#col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
           xlim = c(min(m_domain), max(m_domain)), #ylim = c(0,1.5), 
-          cex.main = cex, cex.axis = cex/1.5)
-      hist(v_m0[,pp], freq = FALSE, main = colnames(Y)[pp], 
+          cex.main = cex, cex.axis = cex/1.2,tck=-0.02)
+      hist(v_m0[,pp], freq = FALSE, main = colnames(Y)[pp], border=rgb(1, 1, 1, 0, maxColorValue = 1),
            xlab = NULL, ylab = NULL, nclass = 20, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
            xlim = c(min(m_domain), max(m_domain)), #ylim = c(0,1.5), 
-           cex.main = cex, cex.axis = cex/1.5, add = TRUE)
-      lines(x=m_domain, y=m1_prior, lwd = 2, col = "grey")
+           cex.main = cex, cex.axis = cex/1.2, add = TRUE)
+      lines(x=m_domain, y=m1_prior, lwd = 2, col = "steelblue4")
       lines(x=m_domain, y=m0_prior, lwd = 2, col = main_colour2)
       legend(x="topleft", legend = c("m1 a priori", "m1 a posteriori", "m0 a priori", "m0 a posteriori"), 
-             fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1), main_colour2, rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
-             bty = "n", cex = cex/1.5)}}
+             fill = c("steelblue4", "skyblue4", main_colour2, rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
+             bty = "n", cex = cex/1.4)}}
   dev.off()
 }
 
@@ -243,23 +242,23 @@ for (i in 1:pages){
   #p11+p00
   png(file = paste0("p1p0_",country,variable,"_",page,".png"), width = 8.27, 
         height = 11.69, units ="in", res=300)
-  par(mfrow = c(n_row, n_col),family="serif",mar=c(3, 1, 2, 1)+ 0.1)
+  par(mfrow = c(n_row, n_col),family="serif",mar=c(3, 1, 2, 1)+ 0.1,mgp=c(1.5,0.2,0))
   for (pp in 1:m) {
     pp<-pp+(page-1)*m
     if (pp<=N){
-    hist(v_p1[,pp], freq = FALSE, main = names[pp], 
-           xlab = NULL, ylab = NULL, nclass = 10, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
+    hist(v_p1[,pp], freq = FALSE, main = names[pp], col="skyblue4",
+           xlab = NULL, ylab = NULL, nclass = 10, #col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
            xlim = c(min(p_domain), max(p_domain)), #ylim = c(0, 8), 
-           cex.main = cex, cex.axis = cex/1.5)
-    hist(v_p0[,pp], freq = FALSE, main = names[pp], 
+           cex.main = cex, cex.axis = cex/1.2,tck=-0.02)
+    hist(v_p0[,pp], freq = FALSE, main = names[pp], border=main_colour2,
            xlab = NULL, ylab = NULL, nclass = 10, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
            xlim = c(min(p_domain), max(p_domain)), #ylim = c(0, 8), 
-           add = TRUE, cex.main = cex, cex.axis = cex/1.5)
-    lines(x=p_domain, y=p11_prior, lwd = 2, col = "grey")
+           add = TRUE, cex.main = cex, cex.axis = cex/1.2)
+    lines(x=p_domain, y=p11_prior, lwd = 2, col = "steelblue4")
     lines(x=p_domain, y=p00_prior, lwd = 2, col = main_colour2)
     legend(x="topleft", legend = c("p11 a priori", "p11 a posteriori", "p00 a priori", "p00 a posteriori"), 
-             fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1), main_colour2, rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
-             bty = "n", cex = cex/1.5)
+             fill = c("steelblue4", "skyblue4", main_colour2, rgb(1, 0, 0, 0.5, maxColorValue = 1)), 
+             bty = "n", cex = cex/1.4)
       }}
   dev.off()
 }
@@ -268,10 +267,11 @@ for (i in 1:pages){
 title="Stopa bezrobocia w Polsce"
 #rho
 png(file = paste0("rho_",country,"_",variable,".png"), width = 400, height = 400)
+
 hist(v_rho, freq = FALSE, main = title, 
      xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
      #xlim = c(lowerbound_rho2, 1), #ylim = c(0, 15), 
-     cex.main = cex, cex.axis = cex/2)
+     cex.main = cex, cex.axis = cex/1.7)
 lines(x = rho_domain, y = rho_prior, lwd = 2, col = "grey")
 legend(x = "topleft", legend = c("rho a priori", "rho a posteriori"), 
        fill = c("grey", rgb(0, 0, 0, 0.5, maxColorValue = 1)), 
@@ -320,26 +320,27 @@ p_Hamilton <- p_Hamilton$p_1
 for (i in 1:pages){
   page<-i
   png(file = paste0("Hamilton_", country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-  par(mfrow = c(n_row, n_col), family="serif",mar=c(3, 1, 2, 1)+ 0.1)
+  par(mfrow = c(n_row, n_col), family="serif",mar=c(2, 2, 2, 0.5)+ 0.1,mgp=c(1,0,0))
   dates<-unique(PL_UE_ch$Period)
   for (pp in 1:m) {
     pp<-pp+(page-1)*m
     if (pp<=N){ 
         plot(x=1:length(dates), y=p_Hamilton[,pp],type="l",lwd=2,xlab="",
-        ylab="p-stwo ekspansji",main=names[pp],
-        cex.axis=cex,cex.main=cex,cex.lab=cex)
+        ylab="p-stwo ekspansji",main=names[pp],col="navy",
+        cex.axis=cex/2,cex.main=cex,cex.lab=cex/2,xaxt="none",yaxt="none")
+        axis(2, cex.axis=cex/1.5, tck=-0.015)
+        axis(1, seq(1,110,12), cex.axis=cex/1.5, srt = 45,tck=-0.015, #col.axis="red",
+             labels=c("2012","2013","2014","2015","2016","2017","2018","2019","2020","2021"))
       }}
   dev.off()
 }
 
 #pal <- colorRampPalette(c("white", main_colour2), bias = 1)
-
-
-nclr<-5
+nclr<-8
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 
 draw_impulse<-function(map,N,theta,W,n,i){
-  nclr<-5
+  nclr<-8
   impulse <- theta$mu_1 - theta$mu_0
   pal <- brewer.pal(nclr, "PuBuGn") # we select 7 colors from the palette
   #sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
@@ -358,7 +359,7 @@ draw_impulse<-function(map,N,theta,W,n,i){
            main = list(label=n[i],cex=0.8,fontfamily="serif"))
 }
 # choice of folder to keep maps 
-n_col<-2
+n_col<-4
 n_row<-3
 m<- n_col*n_row
 names<-colnames(Y)
