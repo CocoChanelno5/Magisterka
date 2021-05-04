@@ -147,7 +147,7 @@ df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
                sheet="PL_GDP_M",na=":")
 colnames(df)
 
-df <- filter(df,str_length(df$ID) == 5)    ###filtering by poviats(5 as number of chars in ID)
+df <- filter(df,str_length(df$ID) == 5)    ### filtering by poviats(5 as number of chars in ID)
 df<-df[match(colnames(W_PL), df$ID), ]
 df_ch<-df[,1:21]
 df<-df[,1:21]
@@ -178,7 +178,7 @@ PL_GDP_ch <- df_change %>%
     values_to = "Value",
   )  ###filtering by poviats(5 as number of chars in ID)
 PL_GDP_ch$Period<-as.Date(as.character(PL_GDP_ch$Period),format="%Y")
-summary(PL_GDP_ch$Value)   # 3.5 ; 9.5
+summary(PL_GDP_ch$Value)   # 3.5 ; 9.5 # 0.5 ; 5.5
 var(PL_GDP_ch$Value)       # 81.42033
 #    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
 # -22.2620   0.7782   5.7229   5.8367  12.2333  38.4070

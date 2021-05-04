@@ -166,7 +166,7 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP"
 
 ########### PRIORS for illustration
 
-load("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_UE_kwi27.rdata")
+load("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP_Apr06.RData")
 library(RColorBrewer)
 library(classInt)
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
@@ -202,13 +202,13 @@ v_rho<-posterior[,1]
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
 main_colour <- "navy"
 main_colour2<- "deeppink3"
-  variable<-'UE'
+  variable<-'GDP'
   country<-'USA'
   cex<-1
   n_col<-4
   n_row<-7
   m<- n_col*n_row
-  names<-colnames(Y)
+  names<-USA_states
   N<-length(colnames(Y))
   pages<-ceiling(N/m)
   
@@ -322,7 +322,7 @@ for (i in 1:pages){
   page<-i
   png(file = paste0("Hamilton_", country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
   par(mfrow = c(n_row, n_col), family="serif",mar=c(2, 2, 2, 0.5)+ 0.1,mgp=c(1,0,0))
-  dates<-unique(USA_UE_ch$Date)
+  dates<-unique(USA_GDP_ch$Period)
   for (pp in 1:m) {
     pp<-pp+(page-1)*m
     if (pp<=N){ 
@@ -330,16 +330,16 @@ for (i in 1:pages){
         ylab="p-stwo ekspansji",main=names[pp],col="navy",
         cex.axis=cex/2,cex.main=cex,cex.lab=cex/2,xaxt="none",yaxt="none")
         axis(2, cex.axis=cex/1.5, tck=-0.015)
-        axis(1, seq(1,254,12), cex.axis=cex/1.5, srt = 45,tck=-0.015, #col.axis="red",
-             labels=c("1999","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012",
-                      "2013","2014","2015","2016","2017","2018","2019","2020","2021"))
+        axis(1, seq(1,60,4), cex.axis=cex/1.5, srt = 45,tck=-0.015, #col.axis="red",
+             labels=c("2006","2007","2008","2009","2010","2011","2012",
+                      "2013","2014","2015","2016","2017","2018","2019","2020"))
       }}
   dev.off()
 }
 
 
 ############### TWORZENEI RYSUNKÓW IMPULSU - indywidualnie dla każdego zestawu
-nclr<-10
+nclr<-9
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -360,12 +360,12 @@ pal<-c()
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   #pp<-1
   #theta<-theta_posterior_means
-  nclr<-10
+  nclr<-9
   #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  pal[1:8] <- brewer.pal(8, "PuBuGn")
-  pal<-rev(pal)
-  pal[9:10] <- brewer.pal(3, "Oranges")[2:3]
+  pal <- brewer.pal(9, "PuBuGn")
+  #pal<-rev(pal)
+  #pal[9:10] <- brewer.pal(3, "Oranges")[2:3]
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -378,12 +378,10 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
 draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
   #pp<-1
   #theta<-theta_posterior_means
-  nclr<-10
+  nclr<-9
   #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  pal[1:8] <- brewer.pal(8, "PuBuGn")
-  pal<-rev(pal)
-  pal[9:10] <- brewer.pal(3, "Oranges")[2:3]
+  pal <- brewer.pal(9, "PuBuGn")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -425,58 +423,11 @@ for (page in 1:pages){
     dev.off()
   }else{
     temp<-seq(1+(page-1)*(m-1), m+(page-1)*(m-1)-1)
-    #temp<-seq(1, 15)
     png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
     plots = lapply(temp, function(.x) draw_impulse2(USA_map,48,names,theta_posterior_means,W,e,r,FALSE,.x))
     do.call(grid.arrange,plots)
     dev.off()
   }
 }
-
-compare<-function(map,N,n,theta,W,ef,r,legend,c,i){
-  ifelse(i==max(c),
-                draw_impulse_empty(map,N,n,theta,W,ef,r,1),
-                draw_impulse2(map,N,n,theta,W,ef,r,legend,i))
-    
-  }
-
-for (page in 1:pages){
-  if (m+(page-1)*(m-1)>N){
-    dif<- m - (N-(m+(page-1)*(m-1))+1)
-    temp<-seq(1+(page-1)*(m-1), m+(page-1)*(m-1))
-    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse2(USA_map,48,names,theta_posterior_means, W, e, r, FALSE, .x))
-    l <- draw_impulse_empty(USA_map,48,names,theta_posterior_means,W,e,r,1)
-    plots = append(plots,l)
-    empty <- seq(1, 16)
-    empty_plot <- lapply(empty, function(.x) plot(x=1,y=1))
-    plots = append(plots,empty_plot)
-    do.call(grid.arrange,plots)
-    dev.off()
-  }else{
-    temp<-seq(1+(page-1)*(m-1), m+(page-1)*(m-1))
-    temp<-seq(1, 15)
-    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) compare(USA_map,48,names,theta_posterior_means, W, e, r, FALSE,temp, .x))
-    #grid.arrange(grobs=plots, ncol=4)
-    do.call(grid.arrange,plots)
-    dev.off()
-  }
-}
-
-
-key <- draw.colorkey(s$legend[[1]]$args$key)
-s$legend <- NULL # Otherwise we'd get two keys
-
-# Modify key
-key$framevp$x <- unit(0.15, "npc")
-key$framevp$y <- unit(0.68, "npc")
-
-# Plot
-s
-grid.draw(key)
-
-plots$legend
-
 
 write.table(rho.sum, file = paste0("rho_results_",country,"_",variable,".csv"), sep = ";", dec = ",")
