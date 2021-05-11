@@ -265,7 +265,7 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, W) {
       
       if(MH_accepted == FALSE) {
         for (sr in 2:S_rho) {
-          rho_candidate <- rtruncnorm(1, a=lowerbound_rho, b=1, mean = simul_rho[sr-1], sd = c)
+          rho_candidate <- rtruncnorm(1, a=lowerbound_rho, b=1, mean = simul_rho[sr-1], sd = c*100)
           theta_cand[[1]] <- rho_candidate
           log_post_now <- rho_posterior_cond(Y, S_simul, theta_now, W)
           log_post_cand <- rho_posterior_cond(Y, S_simul, theta_cand, W)

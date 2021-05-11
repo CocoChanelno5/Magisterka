@@ -165,16 +165,16 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP"
 
 ########### IF SIMULATION RUN BEFORE, START HERE ###################
 
-posterior <- posterior_a
-n<-n_regions
-#n<-n_states
-#rm(posterior, Y, cc, end, start, y_names_estim, yy, yyy)
-
 ########### PRIORS for illustration
+library(grid)
+library(lattice)
+library(gridExtra)
+setwd("~/post_simul/")
 posterior <- posterior_a
 n<-n_regions
 #n<-n_states
 setwd("~/Desktop/Magisterka/Master_git/output")
+
 attach(hyperpar0)
 sigma_domain <- seq(from = 0, to = max(posterior[,(2*n+2):(3*n+1)]), by = 0.01)
 sigma_prior <- dinvgamma(sigma_domain, shape = v_prior/2, scale = delta_prior/2)
@@ -200,16 +200,19 @@ v_p1<-posterior[,(4*n+2):(5*n+1)]
 v_rho<-posterior[,1]
 
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
-  
-  variable<-'UE'
-  country<-'PL'
-  cex<-1
-  n_col<-4
-  n_row<-7
-  m<- n_col*n_row
-  names<-colnames(Y)
-  N<-length(colnames(Y))
-  pages<-ceiling(N/m)
+main_colour <- "navy"
+main_colour2<- "deeppink3"
+variable<-'UE'
+country<-'PL'
+cex<-1
+n_col<-4
+n_row<-7
+m<- n_col*n_row
+unique(PL_GDP_ch$Name)
+colnames(Y) <- unique(PL_UE_ch$Name)
+names<-colnames(Y)
+N<-length(colnames(Y))
+pages<-ceiling(N/m)
   
 ### ILLUSTRATE M
 for (i in 1:pages){
@@ -337,7 +340,7 @@ for (i in 1:pages){
 
 
 ############### TWORZENEI RYSUNKÓW IMPULSU - indywidualnie dla każdego zestawu
-nclr<-10
+nclr<-9
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -372,71 +375,59 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
          par.settings = list(axis.line = list(col =  'transparent')),
          main = list(label=n[i],cex=0.8,fontfamily="serif"))
 }
+
+draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
+  nclr<-9
+  #pal <- colorRampPalette(c("white", "black"), bias = 1)
+  impulse <- theta$mu_1 - theta$mu_0
+  pal[1:7] <- brewer.pal(7, "PuBuGn")
+  pal<-rev(pal)
+  pal[8:10] <- brewer.pal(4, "Oranges")[2:4]
+  impulse2 <- as.matrix(rep(0,N))
+  impulse2[i] <- impulse[i]
+  map@data$response <- as.vector(ef[,i])
+  map@data$bracket <- cut(map@data$response, r)
+  s<-spplot(map, "bracket", lwd=0, col.regions=pal,
+            colorkey=list(space='left',height = 2,width =6),
+            par.settings = list(axis.line = list(col =  'transparent')),
+            main = list(label='',cex=0.8,fontfamily="serif"))
+
+  args <- s$legend$left$args$key
+  ## Prepare list of arguments needed by `legend=` argument (as described in ?xyplot)
+  legendArgs <- list(fun = draw.colorkey,
+                     args = list(key = args),
+                     corner = c(0.5,.5))
+  ## Call spplot() again, this time passing in to legend the arguments
+  ## needed to print a color key
+  spplot(map, "ID", colorkey =FALSE,
+         panel=function(x, y, ...){
+           panel.rect(xleft=180000, ybottom=330000,
+                      xright=181000, ytop=330500, alpha=1)},lwd=0, par.settings = list(axis.line = list(col =  'transparent')),
+         legend = list(inside = legendArgs,cex=5))
+}
+
+png(file = paste0("legend_effect_",country,"_",variable,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+draw_impulse_empty(PL_map,73,names,theta_posterior_means,W,e,r,1)
+dev.off()
+
 setwd(path3)
 ## UNEMPLOYMENT RATE IN POLAND
 for (page in 1:pages){
-  if ((m+(page-1)*m)>N){
-    temp<-seq(1+(page-1)*m,N)
+  if (m+(page-1)*(m-1)>N){
+    dif<- m - (N-(m+(page-1)*(m-1))+1)
+    temp<-seq(1+(page-1)*(m-1),N)
+    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means, W, e, r, FALSE, .x))
+    p<-marrangeGrob(plots, nrow=n_row, ncol=n_col)
+    print(p)
+    dev.off()
+  }else{
+    temp<-seq(1+(page-1)*(m-1), m+(page-1)*(m-1)-1)
+    #temp<-seq(1, 15)
     png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
     plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,FALSE,.x))
     do.call(grid.arrange,plots)
     dev.off()
-  }else{
-    temp<-seq(1+(page-1)*m,m+(page-1)*m)
-    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,FALSE,.x))
-    do.call(grid.arrange,plots)
-    dev.off()
-  }
-}
-
-
-
-#pal <- colorRampPalette(c("white", main_colour2), bias = 1)
-nclr<-8
-impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
-
-draw_impulse<-function(map,N,theta,W,n,i){
-  nclr<-8
-  impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(nclr, "PuBuGn") # we select 7 colors from the palette
-  #sp <- merge(x = map, y = d, by.x = "ID", by.y = "ID")
-  impulse2 <- as.matrix(rep(0,N))
-  #print(i)
-  impulse2[i] <- impulse[i]
-  #print(impulse)
-  effect <- solve(diag(N) - theta$rho * W) %*% impulse2
-  #print(effect)
-  breaks_qt <- classIntervals(effect, n = nclr, style = "quantile")
-  r <- breaks_qt$brks 
-  map@data$response <- as.vector(effect)
-  map@data$bracket <- cut(map@data$response, r)
-  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=TRUE,
-           par.settings = list(axis.line = list(col =  'transparent')),
-           main = list(label=n[i],cex=0.8,fontfamily="serif"))
-}
-# choice of folder to keep maps 
-n_col<-4
-n_row<-3
-m<- n_col*n_row
-names<-colnames(Y)
-N<-length(colnames(Y))
-pages<-ceiling(N/m)
-#setwd(path3)
-## UNEMPLOYMENT RATE IN POLAND
-for (page in 1:pages){
-  if ((m+(page-1)*m)>N){
-    temp<-seq(1+(page-1)*m,N)
-    png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,names,.x))
-    do.call(grid.arrange,plots)
-    dev.off()
-  }else{
-  temp<-seq(1+(page-1)*m,m+(page-1)*m)
-  png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-  plots = lapply(temp, function(.x) draw_impulse(PL_map,73,theta_posterior_means,W,names,.x))
-  do.call(grid.arrange,plots)
-  dev.off()
   }
 }
 

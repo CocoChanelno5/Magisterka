@@ -249,7 +249,7 @@ USA_GDP$Year<-as.Date(USA_GDP$Year,format="%Y")
 USA_GDP$Year<-year(USA_GDP$Year)'''
 
 ############################## OTHER
-draw<-ggplot(data=PL_ST,aes(x=Date,y=Value)) +
+draw<-ggplot(data=PL_UE,aes(x=Date,y=Value)) +
   geom_line( color=main_colour) +
   geom_point(shape=21, color=main_colour, fill=main_colour, size=1) +
   theme_ipsum() +
@@ -281,7 +281,7 @@ draw_gg<-(ggplot(head(draw), aes(x=Period,y=Value,col=factor(Value)))
 draw_gg
 
 draw <- USA_GDP%>%filter(Sect == sectors_usa[2])
-draw<-PL_ST
+draw<-PL_UE
 ######################### CHARTS 
 draw_gg<-(ggplot(draw, aes(x=Period,y=Value, group=factor(Name),
                            col=factor(Name)))

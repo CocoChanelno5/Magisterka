@@ -1,4 +1,4 @@
-setwd("~/Desktop/Magisterka/Master_git_2")
+setwd("~/Desktop/Magisterka/Master_git/Master_git_2")
 source("MC_MG_HF_functions.R")
 
 # file ALL_USA_PL
@@ -28,9 +28,9 @@ W_PL<- matrix_W_distance(PL_map)
 W_USA<- matrix_W_distance(USA_map)
 
 ############## setting dataset of unemployment in Poland
-df<-read_excel("~/Desktop/Magisterka/Master_git_2/dane/ALL_USA_PL.xlsx",
+df<-read_excel("~/Desktop/Magisterka/Master_git/Master_git_2/dane/ALL_USA_PL.xlsx",
            sheet="PL_%BEZR")
-id_list<-read_excel("~/Desktop/Magisterka/Master_git_2/dane/ALL_USA_PL.xlsx",
+id_list<-read_excel("~/Desktop/Magisterka/Master_git/Master_git_2/dane/ALL_USA_PL.xlsx",
                sheet="PL_regiony")
 temp<-data.frame(ID=colnames(W_PL))
 temp<-merge(x=temp, y=id_list,by.x="ID",by.y="ID")
@@ -95,7 +95,7 @@ var(PL_UE_ch$Value)       # 1.472203
 #PL_ST$Period<-as.numeric(PL_ST$Period)
 
 ############## setting dataset of unemployment in USA
-df<-read_excel("~/Desktop/Magisterka/Master_git_2/dane/ALL_USA_PL.xlsx",
+df<-read_excel("~/Desktop/Magisterka/Master_git/Master_git_2/dane/ALL_USA_PL.xlsx",
                sheet="USA_UE")
 colnames(df)
 names(df)<-c("ID","Year","Month", "Label","Value","NetChange_m","%Change_m","Name","seasonal_adj")
@@ -143,7 +143,7 @@ USA_UE <- df %>%
 USA_UE$Date<-as.Date(USA_UE$Date)
 
 ############## setting dataset of GDP in Poland
-df<-read_excel("~/Desktop/Magisterka/Master_git_2/dane/ALL_USA_PL.xlsx",
+df<-read_excel("~/Desktop/Magisterka/Master_git/Master_git_2/dane/ALL_USA_PL.xlsx",
                sheet="PL_GDP_M",na=":")
 colnames(df)
 
@@ -184,7 +184,7 @@ var(PL_GDP_ch$Value)       # 81.42033
 # -22.2620   0.7782   5.7229   5.8367  12.2333  38.4070
 
 ############## setting dataset of GDP in USA
-df<-read_excel("~/Desktop/Magisterka/Master_git_2/dane/ALL_USA_PL.xlsx",
+df<-read_excel("~/Desktop/Magisterka/Master_git/Master_git_2/dane/ALL_USA_PL.xlsx",
                sheet="USA_GDP",na="(D)")
 colnames(df)
 df[, c(5:ncol(df))] <- sapply(df[, c(5:ncol(df))], as.numeric)

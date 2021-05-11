@@ -12,57 +12,7 @@ Y<-dftemp%>% select(c(ID,Period, Value)) %>% pivot_wider(names_from = ID,values_
 Y <- as.matrix(Y[1:18,-1])
 W<-W_PL
 table(is.na(Y))
-## preparing matryx Y for unemployment rate in Poland
-dftemp<-PL_UE_ch
-Y<-dftemp%>% select(c(Name,Period, Value)) %>% pivot_wider(names_from = Name,values_from = Value)
-Y <- as.matrix(Y[,-1])
-W<-W_PL
-table(is.na(Y))
-# preparing matryx Y for GDP in USA
-dftemp<-USA_GDP_ch
-Y<-dftemp%>% select(c(ID,Period, Value)) %>% pivot_wider(names_from = ID,values_from = Value)
-Y <- as.matrix(Y[,-1])
-W<-W_USA
-table(is.na(Y))
 
-## preparing matryx Y for unemployment rate in USA
-dftemp<-USA_UE_ch
-Y<-dftemp%>% select(c(Name,Date, Value)) %>% pivot_wider(names_from = Name,values_from = Value)
-Y <- as.matrix(Y[,-1])
-W<-W_USA
-table(is.na(Y))
-
-############## INITIATE PARAMETERS AND SET HYPERPARAMETERS ##############
-N <- n_regions  # n_states
-
-theta0 <- list(rho = 0.7,
-               mu_1 = rep(3, N),
-               mu_0 = rep(-3, N),
-               omega_d = rep(5, N), #VARIANCES (already squared)
-               p_00 = rep(0.8, N),
-               p_11 = rep(0.8, N))
-
-hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
-                 v_prior = 6,
-                 delta_prior = 0.4,
-                 m_prior = matrix(c(-3, 3), nrow = 2),
-                 M_prior = diag(2))
-##KONDO 
-N <- n_regions  # PL
-# N <- n_states  # USA
-
-theta0 <- list(rho = 0.5,
-               mu_1 = rep(6, N),
-               mu_0 = rep(-6, N),
-               omega_d = rep(5, N), #VARIANCES (already squared)
-               p_00 = rep(0.8, N),
-               p_11 = rep(0.8, N))
-
-hyperpar0 = list(alpha_prior = matrix(c(6, 4, 3, 7), nrow = 2, byrow = TRUE),
-                 v_prior = 6,
-                 delta_prior = 0.8,
-                 m_prior = matrix(c(-6, 6), nrow = 2),
-                 M_prior = diag(2))
 ######################### PARAMETRY DLA PL GDP  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
@@ -72,10 +22,10 @@ theta0 <- list(rho = 0.5,
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
 
-hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
+hyperpar0 = list(alpha_prior = matrix(c(7, 3, 2, 8), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(3.5,9.5), nrow = 2),
+                 m_prior = matrix(c(3.5,15), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -84,42 +34,19 @@ posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_", format(Sys.time(), "%b%d"), ".RData"))
-######################### PARAMETRY DLA PL STOPA BEZROBOCIA  ##########
+######################### PARAMETRY DLA PL GDP 2  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(-1.3, N),
-               mu_0 = rep(-0.2, N),
+               mu_1 = rep(12, N),
+               mu_0 = rep(-1, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
 
-hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
+hyperpar0 = list(alpha_prior = matrix(c(8, 2, 2, 8), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 10,
-                 m_prior = matrix(c(0.2,-1.3), nrow = 2),
-                 M_prior = diag(2))
-
-start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
-end <- Sys.time()
-print(end - start)
-save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_UE_", format(Sys.time(), "%b%d"), ".RData"))
-
-
-
-######################### PARAMETRY DLA USA GDP  ##########
-N <- n_states
-theta0 <- list(rho = 0.5,
-               mu_1 = rep(4, N),
-               mu_0 = rep(2.3, N),
-               omega_d = rep(1, N), #VARIANCES (already squared)
-               p_00 = rep(0.8, N),
-               p_11 = rep(0.8, N))
-
-hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
-                 v_prior = 6,
-                 delta_prior = 2,  ## changed from 0.4
-                 m_prior = matrix(c(2.3,4), nrow = 2),
+                 delta_prior = 0.4,
+                 m_prior = matrix(c(10,15), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -127,44 +54,13 @@ start <- Sys.time()
 posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
 end <- Sys.time()
 print(end - start)
-save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP_", format(Sys.time(), "%b%d"), ".RData"))
-
-######################### PARAMETRY DLA USA STOPA BEZROBOCIA  ##########
-N <- n_states
-theta0 <- list(rho = 0.5,
-               mu_1 = rep(-0.2, N),
-               mu_0 = rep(0.3, N),
-               omega_d = rep(1, N), #VARIANCES (already squared)
-               p_00 = rep(0.8, N),
-               p_11 = rep(0.8, N))
-
-hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
-                 v_prior = 6,
-                 delta_prior = 8,
-                 m_prior = matrix(c(0.5,-1), nrow = 2),
-                 M_prior = diag(2))
-
-
-start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
-end <- Sys.time()
-print(end - start)
-save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_UE_", format(Sys.time(), "%b%d"), ".RData"))
-
-############ POSTERIOR SIMULATION #################################
-posterior_a <- list()
-start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 10000, S0_rho = 2000, Y = Y, W = W)
-end <- Sys.time()
-print(end - start)
-
-save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP", format(Sys.time(), "%b%d"), ".RData"))
-#save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP", format(Sys.time(), "%b%d"), ".RData"))
-#save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_UE", format(Sys.time(), "%b%d"), ".RData"))
-#save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_UE", format(Sys.time(), "%b%d"), ".RData"))
-
+save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_", format(Sys.time(), "%b%d"), ".RData"))
 
 ########### PRIORS for illustration
+
+# pierwsza proba
+load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
+# druga proba
 load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
 library(RColorBrewer)
 library(classInt)
@@ -199,21 +95,96 @@ v_p0<-posterior[,(3*n+2):(4*n+1)]
 v_p1<-posterior[,(4*n+2):(5*n+1)]
 v_rho<-posterior[,1]
 
+
+########### PRIORS for illustration
+library(grid)
+library(lattice)
+library(gridExtra)
+posterior <- posterior_a
+n<-n_regions
+#n<-n_states
+setwd("~/Desktop/Magisterka/Master_git/output")
+
+attach(hyperpar0)
+sigma_domain <- seq(from = 0, to = max(posterior[,(2*n+2):(3*n+1)]), by = 0.01)
+sigma_prior <- dinvgamma(sigma_domain, shape = v_prior/2, scale = delta_prior/2)
+m1_domain <- seq(from = min(posterior[,2:(n+1)]), to = max(posterior[,2:(n+1)]), by = 0.01)
+m0_domain <- seq(from = min(posterior[,(n+2):(2*n+1)]), to = max(posterior[,(n+2):(2*n+1)]), by = 0.01)
+m_domain <- seq(from = min(c(m0_domain, m1_domain)), to = max(c(m1_domain, m0_domain)), by = 0.01)
+m1_prior <- dnorm(m_domain, mean = m_prior[2], sd = M_prior[2,2]^0.5)
+m0_prior <- dnorm(m_domain, mean = m_prior[1], sd = M_prior[1,1]^0.5)
+p_domain <- seq(from = 0, to = 1, by = 0.01)
+p11_prior <- dbeta(p_domain, alpha_prior[2,2], alpha_prior[2,1])
+p00_prior <- dbeta(p_domain, alpha_prior[1,1], alpha_prior[1,2])
+
+lowerbound_rho <- 1/min(eigen(W)$values)
+lowerbound_rho2 <- -0.5
+rho_domain <- seq(from = lowerbound_rho2, to = 1, by = 0.01)
+rho_prior <- rep(1/(1-lowerbound_rho2), length(rho_domain))
+
+v_m1<-posterior[,2:(n+1)]
+v_m0<-posterior[,(n+2):(2*n+1)]
+v_omega<-posterior[,(2*n+2):(3*n+1)]
+v_p0<-posterior[,(3*n+2):(4*n+1)]
+v_p1<-posterior[,(4*n+2):(5*n+1)]
+v_rho<-posterior[,1]
+
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
+
+# 1
+load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
+# 2
+
+
+library(RColorBrewer)
+library(classInt)
+library(gridExtra)
+path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
+path2<-"~/Desktop/Magisterka/Master_git/raw_maps/"
+path3<-"~/Desktop/Magisterka/Master_git/output/"
+posterior <- posterior_a
+n<-n_regions
+setwd("~/Desktop/Magisterka/Master_git/output")
+
+attach(hyperpar0)
+sigma_domain <- seq(from = 0, to = max(posterior[,(2*n+2):(3*n+1)]), by = 0.01)
+sigma_prior <- dinvgamma(sigma_domain, shape = v_prior/2, scale = delta_prior/2)
+m1_domain <- seq(from = min(posterior[,2:(n+1)]), to = max(posterior[,2:(n+1)]), by = 0.01)
+m0_domain <- seq(from = min(posterior[,(n+2):(2*n+1)]), to = max(posterior[,(n+2):(2*n+1)]), by = 0.01)
+m_domain <- seq(from = min(c(m0_domain, m1_domain)), to = max(c(m1_domain, m0_domain)), by = 0.01)
+m1_prior <- dnorm(m_domain, mean = m_prior[2], sd = M_prior[2,2]^0.5)
+m0_prior <- dnorm(m_domain, mean = m_prior[1], sd = M_prior[1,1]^0.5)
+p_domain <- seq(from = 0, to = 1, by = 0.01)
+p11_prior <- dbeta(p_domain, alpha_prior[2,2], alpha_prior[2,1])
+p00_prior <- dbeta(p_domain, alpha_prior[1,1], alpha_prior[1,2])
+
+lowerbound_rho <- 1/min(eigen(W)$values)
+lowerbound_rho2 <- -0.5
+rho_domain <- seq(from = lowerbound_rho2, to = 1, by = 0.01)
+rho_prior <- rep(1/(1-lowerbound_rho2), length(rho_domain))
+
+v_m1<-posterior[,2:(n+1)]
+v_m0<-posterior[,(n+2):(2*n+1)]
+v_omega<-posterior[,(2*n+2):(3*n+1)]
+v_p0<-posterior[,(3*n+2):(4*n+1)]
+v_p1<-posterior[,(4*n+2):(5*n+1)]
+v_rho<-posterior[,1]
+
+
+
 main_colour <- "navy"
 main_colour2<- "deeppink3"
-
-  variable<-'GDP'
-  country<-'PL'
-  cex<-1
-  n_col<-4
-  n_row<-7
-  m<- n_col*n_row
-  unique(PL_GDP_ch$Name)
-  colnames(Y) <- unique(PL_GDP_ch$Name)
-  names<-colnames(Y)
-  N<-length(colnames(Y))
-  pages<-ceiling(N/m)
+variable<-'GDP'
+country<-'PL'
+cex<-1
+n_col<-4
+n_row<-7
+m<- n_col*n_row
+unique(PL_GDP_ch$Name)
+colnames(Y) <- unique(PL_GDP_ch$Name)
+names<-colnames(Y)
+N<-length(colnames(Y))
+pages<-ceiling(N/m)
   
 ### ILLUSTRATE M
 for (i in 1:pages){
@@ -306,7 +277,7 @@ post2 <- cbind(t(post.sum[,(n+2):(2*n+1)]),
               t(post.sum[,(4*n+2):(5*n+1)]),
               t(post.sum[,(2*n+2):(3*n+1)]))
 rownames(post2) <- names
-colnames(post2) <- paste0(rep(c("m0", "m1", "p00", "p01", "sigma"), each = 4), " ", rep(c("post mean", "post SD", "HPDI 95 L", "HPDI 95 U"), 5))
+colnames(post2) <- paste0(rep(c("m0", "m1", "p00", "p11", "sigma"), each = 4), " ", rep(c("post mean", "post SD", "HPDI 95 L", "HPDI 95 U"), 5))
 post2 <- round(post2,3)
 write.table(post2, file = paste0(country,variable, "_results.csv"), sep = ";", dec = ",")
 rho.sum <- post.sum[,1]
@@ -341,8 +312,7 @@ for (i in 1:pages){
 }
 
 #pal <- colorRampPalette(c("white", main_colour2), bias = 1)
-library(gridExtra)
-nclr<-10
+nclr<-9
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -355,20 +325,15 @@ vec_e<-c(e)
 breaks_qt <- classIntervals(vec_e,2, n = nclr, style = "equal")
 r <- breaks_qt$brks 
 # choice of folder to keep maps
-n_col<-3
+n_col<-4
 n_row<-5
 m<- n_col*n_row
 pages<-ceiling(N/m)
 pal<-c()
+
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
-  #pp<-1
-  #theta<-theta_posterior_means
-  nclr<-10
-  #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  #pal[1:7] <- brewer.pal(7, "PuBuGn")
-  #pal<-rev(pal)
-  pal <- brewer.pal(10, "Oranges")
+  pal <- brewer.pal(9, "Oranges")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -377,17 +342,53 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
          par.settings = list(axis.line = list(col =  'transparent')),
          main = list(label=n[i],cex=0.8,fontfamily="serif"))
 }
+
+draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
+  impulse <- theta$mu_1 - theta$mu_0
+  pal <- brewer.pal(9, "Oranges")
+  impulse2 <- as.matrix(rep(0,N))
+  impulse2[i] <- impulse[i]
+  map@data$response <- as.vector(ef[,i])
+  map@data$bracket <- cut(map@data$response, r)
+  s<-spplot(map, "bracket", lwd=0, col.regions=pal,
+            colorkey=list(space='left',height = 2,width =6),
+            par.settings = list(axis.line = list(col =  'transparent')),
+            main = list(label='',cex=5,fontfamily="serif"))
+  library(grid)
+  library(lattice)
+  args <- s$legend$left$args$key
+  ## Prepare list of arguments needed by `legend=` argument (as described in ?xyplot)
+  legendArgs <- list(fun = draw.colorkey,
+                     args = list(key = args),
+                     corner = c(0.5,.5))
+  ## Call spplot() again, this time passing in to legend the arguments
+  ## needed to print a color key
+  spplot(map, "ID", colorkey =FALSE,
+         panel=function(x, y, ...){
+           panel.rect(xleft=180000, ybottom=330000,
+                      xright=181000, ytop=330500, alpha=1)},lwd=0, par.settings = list(axis.line = list(col =  'transparent')),
+         legend = list(inside = legendArgs))
+}
+
+png(file = paste0("legend_effect_",country,"_",variable,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+draw_impulse_empty(PL_map,73,names,theta_posterior_means,W,e,r,1)
+dev.off()
+
+
 setwd(path3)
-## UNEMPLOYMENT RATE IN POLAND
+## GDP IN POLAND
 for (page in 1:pages){
-  if ((m+(page-1)*m)>N){
-    temp<-seq(1+(page-1)*m,N)
+  if (m+(page-1)*(m-1)>N){
+    dif<- m - (N-(m+(page-1)*(m-1))+1)
+    temp<-seq(1+(page-1)*(m-1),N)
     png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,FALSE,.x))
-    do.call(grid.arrange,plots)
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means, W, e, r, FALSE, .x))
+    p<-marrangeGrob(plots, nrow=n_row, ncol=n_col)
+    print(p)
     dev.off()
   }else{
-    temp<-seq(1+(page-1)*m,m+(page-1)*m)
+    temp<-seq(1+(page-1)*(m-1), m+(page-1)*(m-1)-1)
+    #temp<-seq(1, 15)
     png(file = paste0("effect_",country,variable,"_",page,".png"), width = 8.27, height = 11.69, units ="in",res=300)
     plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,FALSE,.x))
     do.call(grid.arrange,plots)
@@ -395,6 +396,10 @@ for (page in 1:pages){
   }
 }
 
+write.table(rho.sum, file = paste0("rho_results_",country,"_",variable,".csv"), sep = ";", dec = ",")
+
+
+################### OLD
 draw_impulse<-function(map,N,theta,W,n,i){
   nclr<-8
   impulse <- theta$mu_1 - theta$mu_0
@@ -437,4 +442,4 @@ for (page in 1:pages){
   }
 }
 
-write.table(rho.sum, file = paste0("rho_results_",country,"_",variable,".csv"), sep = ";", dec = ",")
+

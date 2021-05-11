@@ -20,7 +20,7 @@ library(stringr)
 library(zoo)
 library(RColorBrewer)
 library(classInt)
-setwd("~/Desktop/Magisterka/Master_git_2")
+setwd("~/Desktop/Magisterka/Master_git/Master_git_2")
 
 ############## FUNCTIONS ####################
 make_residuals <- function(Y, Yl, S, theta, W) {
@@ -41,14 +41,13 @@ MH_posterior_cond <- function(Y, Yl, S, theta, W) {
   TT <- nrow(Y)
   det_M_inv <- det(diag(N) - theta$rho * W)
   epsilon <- make_residuals(Y, Yl, S, theta, W)
-  post_rho <- TT * log(det_M_inv)
+  p <- TT * log(det_M_inv)
   inv_Omega <- solve(diag(theta$omega_d))
   for (tt in 1:TT) {
-    post_rho <- post_rho 
-                - 0.5 * as.numeric(t(as.matrix(epsilon[tt, ])) %*% inv_Omega %*% as.matrix(epsilon[tt, ]))
+    p <- p - 0.5 * as.numeric(t(as.matrix(epsilon[tt, ])) %*% inv_Omega %*% as.matrix(epsilon[tt, ]))
     #post_phi <- post_rho - 0.5 * as.numeric(t(as.matrix(epsilon[tt, ])) %*% inv_Omega %*% as.matrix(epsilon[tt, ]))
   }
-  return(post_rho)
+  return(p)
 }
 
 loglik_conditional_S <- function(S, Y, Yl, theta, W) {
@@ -242,6 +241,7 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
     }
     
     #Step 7: rho (M-H)
+    S_rho<-100
     simul_rho <- rep(NA, S_rho)
     simul_phi <- rep(NA, S_rho)
     acceptance_p <- rep(NA, S_rho-1)
@@ -270,7 +270,7 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
         }
         if(mean(acceptance_p) >= 0.2 && mean(acceptance_p) <= 0.4) {
           MH_accepted <- TRUE
-          print(paste0("Terminating procedure for rho with c=", c, " and avg accept p = ", mean(acceptance_p)))
+          print(paste0("Terminating procedure for rho and phi with c=", c, " and avg accept p = ", mean(acceptance_p)))
         }
       }
       
@@ -285,71 +285,21 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
           acceptance_p[sr-1] <- min(exp(log_post_cand - log_post_now), 1)
           if (runif(1) <= acceptance_p[sr-1]) {
             simul_rho[sr] <- rho_candidate
+            simul_phi[sr] <- phi_candidate
             theta_now <- theta_cand
           } else {
             simul_rho[sr] <- simul_rho[sr-1]
+            simul_phi[sr] <- simul_phi[sr-1]
           }
         }
-        print(paste0("Avg acceptance prob for rho: ", mean(acceptance_p)))
-      }
-    }
-    
-    #Step 8: phi (M-H)
-    simul_phi <- rep(NA, S_phi)
-    acceptance_p2 <- rep(NA, S_phi-1)
-    
-    theta_now2 <- relist(as.numeric(simulation[ss,]), N)
-    theta_now2[[2]] <- as.numeric(simulation[ss-1,2])
-    theta_now2[[1]] <- as.numeric(simulation[ss-1,1])
-    print(theta_prev[2])
-    theta_cand2 <- theta_now2
-    simul_phi[1] <- as.numeric(theta_prev[2])
-    MH_accepted2 <- FALSE
-    
-    while(MH_accepted2 == FALSE) {
-      
-      if(is.na(acceptance_p2[1])) {
-        c <- 0.02
-        print(paste0("Initiating c to ", c))
-      } else {
-        if(mean(acceptance_p2) < 0.2) {
-          c <- c * 0.66
-          print(paste0("Downscaling c to ", c))
-        } 
-        if(mean(acceptance_p2) > 0.4) {
-          c <- c * 1.5
-          print(paste0("Upscaling c to ", c))
-        }
-        if(mean(acceptance_p2) >= 0.2 && mean(acceptance_p2) <= 0.4) {
-          MH_accepted2 <- TRUE
-          print(paste0("Terminating procedure for phi with c=", c, " and avg accept p = ", mean(acceptance_p2)))
-        }
-      }
-      
-      if(MH_accepted2 == FALSE) {
-        for (sp in 2:S_phi) {
-          phi_candidate <- rtruncnorm(1, a=-1, b=1, mean = simul_phi[sp-1], sd = c*1000)
-          theta_cand2[[2]] <- phi_candidate
-          #print(theta_cand2)
-          log_post_now_phi <- MH_posterior_cond(Y, Yl, S_simul, theta_now2, W)[2]
-          log_post_cand_phi <- MH_posterior_cond(Y, Yl, S_simul, theta_cand2, W)[2]
-          acceptance_p2[sp-1] <- min(exp(log_post_cand_phi - log_post_now_phi),1)
-          #print(acceptance_p2[sp-1])
-          if (runif(1) <= acceptance_p2[sp-1]) {
-            simul_phi[sp] <- phi_candidate
-            theta_now2 <- theta_cand2
-          } else {
-            simul_phi[sp] <- simul_phi[sp-1]
-          }
-        }
-        print(paste0("Avg acceptance prob for phi: ", mean(acceptance_p2)))
+        print(paste0("Avg acceptance prob for rho and phi: ", mean(acceptance_p)))
       }
     }
     
     simul_rho <- simul_rho[(S0_rho+1):length(simul_rho)]
     draw_rho <- simul_rho[ceiling(runif(1, min = 0, max = length(simul_rho)))]
     
-    simul_phi <- simul_phi[(S0_phi+1):length(simul_phi)]
+    simul_phi <- simul_phi[(S0_rho+1):length(simul_phi)]
     draw_phi <- simul_phi[ceiling(runif(1, min = 0, max = length(simul_phi)))]
     
     simulation[ss, 1] <- draw_rho
@@ -368,7 +318,7 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
 # spatial data for PL : NUTS_RG_01M_2021_3035
 
 draw_map<-function(poland){
-  setwd("~/Desktop/Magisterka/Master_git_2/maps")
+  setwd("~/Desktop/Magisterka/Master_git/Master_git_2/maps")
   a<-list()
   if (poland==1){
     library(rgdal)

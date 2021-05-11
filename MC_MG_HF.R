@@ -78,16 +78,16 @@ hyperpar0 = list(alpha_prior = matrix(c(6, 4, 3, 7), nrow = 2, byrow = TRUE),
 ######################### PARAMETRY DLA PL GDP  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(9.5, N),
-               mu_0 = rep(3.5, N),
+               mu_1 = rep(12, N),
+               mu_0 = rep(-1, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
 
-hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
+hyperpar0 = list(alpha_prior = matrix(c(8, 2, 2, 8), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(3.5,9.5), nrow = 2),
+                 m_prior = matrix(c(10,15), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -178,7 +178,6 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_GDP"
 ########### IF SIMULATION RUN BEFORE, START HERE ###################
 setwd("~/post_simul/")
 posterior <- posterior_a
-load(paste0("posterior", format(Sys.time(), "%a %b %d %X %Y"), ".RData"))
 n<-n_regions
 n<-n_states
 #rm(posterior, Y, cc, end, start, y_names_estim, yy, yyy)
@@ -200,34 +199,23 @@ lowerbound_rho2 <- -0.5
 rho_domain <- seq(from = lowerbound_rho2, to = 1, by = 0.01)
 rho_prior <- rep(1/(1-lowerbound_rho2), length(rho_domain))
 
-id_pl<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
-                    sheet="PL_regiony")
-id_usal<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
-                  sheet="USA_reg")
-country<-id_pl
-regions_ordered <- data.frame(code = colnames(Y), v.order = 1:73, 
-                                  names = country$Name,
-                                  old_code = country$ID,
-                                  stringsAsFactors = FALSE)
-
-library(rgdal)
-map <- merge(x = PL_map, y = regions_ordered, by.x = "ID", by.y = "old_code")
-map <- map[order(map$v.order), ]
-
-map <- merge(x = USA_map, y = regions_ordered, by.x = "ID", by.y = "old_code")
-map <- map[order(map$v.order), ]
 
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
-N <- ncol(Y)
-map<-PL_GDP
-map@data$names<-colnames(Y)
-setwd("~/Desktop/Magisterka/Master_git/output")
+main_colour <- "navy"
+main_colour2<- "deeppink3"
+variable<-'UE'
+country<-'PL'
+cex<-1
 n_col<-4
 n_row<-7
 m<- n_col*n_row
+unique(PL_UE_ch$Name)
+colnames(Y) <- unique(PL_GDP_ch$Name)
+names<-colnames(Y)
+N<-length(colnames(Y))
+pages<-ceiling(N/m)
 
 draw_m0m1<-function(data,rows, columns,text, variable, country, cex){
-  
   variable<-'UE'
   country<-'PL'
   cex<-1
