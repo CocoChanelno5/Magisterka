@@ -48,25 +48,29 @@ PL_GDP_test <- PL_GDP %>% select(1,6,7)
 test <- data.frame(split(PL_GDP_test$Value,PL_GDP_test$ID))
 LLC1 <- purtest(test, test = "ips", exo = "intercept",
                lags = "AIC", pmax = 1)
-summary(LLC1) #NA
+summary(LLC1)
+print(LLC1)#NA
 print(paste("Statystyka testu ips dla zestawu PL_GDP wynosi",LLC1$statistic,"a p-value:",LLC1$p.value))
 
 PL_UE_test <- PL_UE %>% select(2,8,9)
 test <- data.frame(split(PL_UE_test$Value,PL_UE_test$ID))
 LLC2 <- purtest(test, test = "ips", exo = "intercept", lags = "AIC", pmax = 4)
 summary(LLC2) #cannot reject the null, all of the series are I(1)
+print(LLC2)
 print(paste("Statystyka testu ips dla zestawu PL_UE wynosi",LLC2$statistic,"a p-value:",LLC2$p.value))
 
 USA_GDP_test <- USA_GDP %>% select(1,7,8)
 test <- data.frame(split(USA_GDP_test$Value,USA_GDP_test$ID))
 LLC3 <- purtest(test, test = "ips", exo = "intercept", lags = "AIC", pmax = 4)
 summary(LLC3) #cannot reject the null, all of the series are I(1)
+print(LLC3)
 print(paste("Statystyka testu ips dla zestawu USA_GDP wynosi",LLC3$statistic,"a p-value:",LLC3$p.value))
 
 USA_UE_test <- USA_UE %>% select(1,6,7)
 test <- data.frame(split(USA_UE_test$Value,USA_UE_test$ID))
 LLC4 <- purtest(test, test = "ips", exo = "intercept", lags = "AIC", pmax = 1)
 summary(LLC4) #reject the null, at least one series is I(0)
+print(LLC4)
 print(paste("Statystyka testu ips dla zestawu USA_UE wynosi",LLC4$statistic,"a p-value:",LLC4$p.value))
 
 

@@ -121,17 +121,19 @@ draw_timelines_matrix(USA_UE,7, 4,"BEZR_USA","'stopa bezrobocia'",file1,0,1)
 draw_timelines_matrix(USA_GDP,7, 4,"GDP_USA","'PKB'",file1,0,1000)
 
 ############################################# drawing timelines with grouped/selected regions
-draw_timelines_selected<-function(data, lista, rows, columns,text, variable, dir, point, div=1, width = 8.27, height = 11.69){
-for (i in 1:length(lista)){
-  data<-data
+draw_timelines_selected<-function(dataset, lista, rows, columns,text, variable, div=1, width = 8.27, height = 11.69){
+  draw<-list()
+  for (i in 1:length(lista)){
+  data<-dataset
   a<-mean(data$MEAN/div)
-  d<-data[which(data$Name %in% lista_USA_GDP[[i]]),]%>%filter(Value!=0)
+  d<-data[which(data$Name %in% lista[[i]]),]%>%filter(Value!=0)
   library("ggsci")
   library("viridis")
   library(wesanderson)
   pal <- wes_palette("Zissou1", 100, type = "continuous")
+ 
   draw[[i]]<-ggplot(data=d,aes(x=Date,y=Value/div, group=Name, colour = Name)) +
-    geom_line(size=1) +
+    geom_line(size=0.5) +
     theme_ipsum() +
     scale_color_viridis(discrete = TRUE, option = "D") +
     #scale_fill_gradientn(colours = pal) +
@@ -145,12 +147,12 @@ for (i in 1:length(lista)){
     labs(color = "Podregiony:",face="bold") +
     theme(plot.margin = margin(0.3, 0.3, 0.3, 0.3, "cm"),
           legend.margin = margin(0.2, 0.2, 0.2, 0.2, "cm"),
-          axis.title.x = element_text(size = 5, family = f),
-          axis.title.y = element_text(size = 5, family = f),
+          axis.title.x = element_text(size = 6, family = f),
+          axis.title.y = element_text(size = 6, family = f),
           #plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 5,family = f),
-          axis.text.x = element_text(size = 5, angle=50,family = f),
-          axis.text.y = element_text(size = 5, angle=50,family = f),
-          legend.text = element_text(size = 4, family = f),
+          axis.text.x = element_text(size = 6, family = f),
+          axis.text.y = element_text(size = 6, family = f),
+          legend.text = element_text(size = 5, family = f),
           legend.title = element_text(size = 6, family = f),
           legend.position = "right",
           legend.key.size = unit(0.5, "cm"),
@@ -164,10 +166,14 @@ print(p)
 dev.off()
 }
 
-draw_timelines_selected(PL_UE, lista_PL_UE, 3, 2,"BEZR_PL_sel","'stopa bezrobocia'",path2, 0, div=1, width = 8.27,height = 8.27)
-draw_timelines_selected(PL_GDP, lista_PL_GDP, 3, 2,"GDP_PL_sel","'PKB'",path2, 0, div=1000, width = 8.27,height = 8.27)
-draw_timelines_selected(USA_UE, lista_USA_UE, 3, 2,"BEZR_USA_sel","'stopa bezrobocia'",path2, 0, div=1, width = 8.27,height = 8.27)
-draw_timelines_selected(USA_GDP, lista_USA_GDP, 3, 2,"GDP_USA_sel","'PKB'", path2, 0, div=1000, width = 8.27, height = 8.27)
+draw_timelines_selected(PL_UE, lista_PL_UE, 4, 2,"BEZR_PL_sel","'stopa bezrobocia'", 
+                        div=1, width = 8.27,height = 11.69)
+draw_timelines_selected(PL_GDP, lista_PL_GDP, 3, 2,"GDP_PL_sel","'PKB'", 
+                        div=1000, width = 8.27,height = 11.69)
+draw_timelines_selected(USA_UE, lista_USA_UE, 3, 2,"BEZR_USA_sel","'stopa bezrobocia'", 
+                        div=1, width = 8.27,height = 8.27)
+draw_timelines_selected(USA_GDP, lista_USA_GDP, 3, 2,"GDP_USA_sel","'PKB'",  
+                        div=1000, width = 8.27, height = 8.27)
   
 ########################## drawing single maps with yearly data
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
@@ -255,38 +261,38 @@ require(gridExtra)
 temp<-unique(year(PL_UE$Date))
 png(file = paste0("mapM_BEZR_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
 temp<-c(2011, 2013, 2015, 2017, 2019, 2021)
-png(file = paste0("mapselM_BEZR_PL.png"), width = 8.27, height = 6.27, units ="in",res=300)
+png(file = paste0("mapselM_BEZR_PL.png"), width = 8.27, height = 8.27, units ="in",res=300)
 plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_UE,PL_map,"'stopa bezrobocia'",8,1,"OrRd",.x,FALSE,"equal",temp))
 do.call(grid.arrange,c(plots, ncol=3))
 dev.off()
-png(file = paste0("legmap_BEZR_PL.png"), width = 8, height =6, units ="in",res=300)
-draw_raw_matrixMaps(PL_UE,PL_map,"'stopa bezrobocia'",8,1,"OrRd",2018,list(space='left',height = 1,width =4),"equal",temp)
+png(file = paste0("legmap_BEZR_PL.png"), width = 4, height =3, units ="in",res=300)
+draw_raw_matrixMaps(PL_UE,PL_map,"'stopa bezrobocia'",8,1,"OrRd",2018,list(space='left',height = 1,width =3,cex=30),"equal",temp)
 dev.off()
 
 #### GDP IN POLAND
 temp<-unique(year(PL_GDP$Date))
 png(file = paste0("mapM_GDP_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
 temp<-c(2000, 2004, 2008, 2012, 2016, 2018)
-png(file = paste0("mapselM_GDP_PL.png"), width = 8.27, height = 6.27, units ="in",res=300)
-plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_GDP,PL_map,"'PKB'",8,1000,"PuBuGn",.x,FALSE,"equal",temp))
-do.call(grid.arrange,c(plots, ncol=3))
+png(file = paste0("mapselM_GDP_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_GDP,PL_map,"'PKB'",8,1000,"PuBuGn",.x,FALSE,"quantile",temp))
+do.call(grid.arrange,c(plots, ncol=4))
 dev.off()
 # legend
-png(file = paste0("legmap_GDP_PL.png"), width = 8, height =6, units ="in",res=300)
-draw_raw_matrixMaps(PL_GDP,PL_map,"'PKB'",8,1000,"PuBuGn",2018,list(space='left',height = 1,width =4),"equal",temp)
+png(file = paste0("legmap_GDP_PL.png"), width = 4, height =3, units ="in",res=300)
+draw_raw_matrixMaps(PL_GDP,PL_map,"'PKB'",8,1000,"PuBuGn",2018,list(space='left',height = 1,width =3),"quantile",temp)
 dev.off()
 
 #### UNEMPLOYMENT RATE IN USA
 temp<-unique(year(USA_UE$Date))
-png(file = paste0("mapM_BEZR_USA.png"), width = 8.27, height = 11.69, units ="in",res=300)
+png(file = paste0("mapM_BEZR_USA.png"), width = 8.27, height = 11.69, units ="in", res=300)
 temp<-c(2002, 2006, 2010, 2014, 2018, 2021)
-png(file = paste0("mapselM_BEZR_USA.png"), width = 8.27, height = 5.27, units ="in",res=300)
+png(file = paste0("mapselM_BEZR_USA.png"), width = 8.27, height = 5.27, units ="in", res=300)
 plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_UE,USA_map,"'stopa bezrobocia'\n",8,1,"OrRd",.x,FALSE,"equal",temp))
 do.call(grid.arrange,c(plots, ncol=3))
 dev.off()
 # legend
-png(file = paste0("legmap_BEZR_USA.png"), width = 8, height =6, units ="in",res=300)
-draw_raw_matrixMaps(USA_UE,USA_map,"'stopa bezrobocia'",8,1,"OrRd",2018,list(space='left',height = 1,width =4),"equal",temp)
+png(file = paste0("legmap_BEZR_USA.png"), width = 4, height =3, units ="in",res=300)
+draw_raw_matrixMaps(USA_UE,USA_map,"'stopa bezrobocia'",8,1,"OrRd",2018,list(space='left',height = 1,width =3),"equal",temp)
 dev.off()
 
 #### GDP IN USA
@@ -294,12 +300,12 @@ temp<-unique(year(USA_GDP$Date))
 png(file = paste0("mapM_GDP_USA.png"), width = 8.27, height = 11.69, units ="in",res=300)
 temp<-c(2008, 2012, 2016, 2020)
 png(file = paste0("mapselM_GDP_USA.png"), width = 8.27, height = 5.27, units ="in",res=300)
-plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_GDP,USA_map,"'PKB'",8,1000,"PuBuGn",.x,FALSE,"equal",temp))
-do.call(grid.arrange,c(plots, ncol=2))
+plots = lapply(temp, function(.x) draw_raw_matrixMaps(USA_GDP,USA_map,"'PKB'",8,1000,"PuBuGn",.x,FALSE,"quantile",temp))
+do.call(grid.arrange,c(plots, ncol=3))
 dev.off()
 # legend
-png(file = paste0("legmap_GDP_USA.png"), width = 8, height =6, units ="in",res=300)
-draw_raw_matrixMaps(USA_GDP,USA_map,"'PKB'",8,1000,"PuBuGn",2018,list(space='left',height = 1,width =4),"equal",temp)
+png(file = paste0("legmap_GDP_USA.png"), width = 4, height = 3, units ="in",res=300)
+draw_raw_matrixMaps(USA_GDP,USA_map,"'PKB'",8,1000,"PuBuGn",2018,list(space='left',height = 1, width =3),"quantile",temp)
 dev.off()
 
 ##################### LISTY 
@@ -332,16 +338,18 @@ lista_USA_UE[[6]] <- c("Nevada", "Michigan")  #2
 lista_PL_UE <-list()
 lista_PL_UE[[1]] <- c("Miasto Kraków", "Miasto Szczecin", "Miasto Wrocław", "Miasto Warszawa", "Miasto Poznań", "Miasto Łódź") #6
 lista_PL_UE[[2]] <- c("Kaliski", "Poznański", "Trójmieski", "Gliwicki", "Katowicki", "Leszczyński", "Lubelski", "Tyski", 
-"Bielski", "Rybnicki", "Warszawski Zachodni", #11
-"Bydgosko-toruński", "Nowotarski", "Opolski", "Siedlecki", "Skierniewicki", "Wrocławski", 
-"Legnicko-głogowski", "Krakowski", "Żyrardowski") #9
-lista_PL_UE[[3]] <- c("Łomżyński", "Puławski", "Sandomiersko-jędrzejowski", "Oświęcimski", "Bytomski", "Koniński", "Łódzki", "Piotrkowski", "Rzeszowski", 
-"Sieradzki", "Tarnobrzeski","Tarnowski", "Warszawski Wschodni", "Częstochowski") #14
-lista_PL_UE[[4]] <- c("Białostocki", "Pilski", "Gdański", "Zielonogórski", "Sosnowiecki", "Gorzowski", "Bialski", "Kielecki", "Ostrołęcki", 
-"Nowosądecki", "Suwalski", "Chełmsko-zamojski", "Ciechanowski", "Przemyski", "Krośnieński") #15
-lista_PL_UE[[5]] <- c("Nyski", "Olsztyński", "Słupski", "Chojnicki", "Elbląski", "Jeleniogórski", "Koszaliński", "Starogardzki", 
-"Szczeciński", "Wałbrzyski", "Grudziącki", "Płocki", "Świecki") #13
-lista_PL_UE[[6]] <- c("Ełcki", "Radomski", "Włocławski", "Szczeciniecko-pyrzycki", "Inowrocławski") #5
+                      "Bielski", "Rybnicki", "Warszawski Zachodni") #11
+lista_PL_UE[[3]] <- c("Bydgosko-toruński", "Nowotarski", "Opolski", "Siedlecki", "Skierniewicki", "Wrocławski", 
+                      "Legnicko-głogowski", "Krakowski", "Żyrardowski") #9
+lista_PL_UE[[4]] <- c("Łomżyński", "Puławski", "Sandomiersko-jędrzejowski", "Oświęcimski", "Bytomski", 
+                      "Koniński", "Łódzki", "Piotrkowski", "Rzeszowski") #9 
+lista_PL_UE[[5]] <- c("Sieradzki", "Tarnobrzeski","Tarnowski", "Warszawski Wschodni", "Częstochowski",
+                      "Białostocki", "Pilski", "Gdański", "Zielonogórski", "Sosnowiecki") #10
+lista_PL_UE[[6]] <- c("Gorzowski", "Bialski", "Kielecki", "Ostrołęcki", 
+                      "Nowosądecki", "Suwalski", "Chełmsko-zamojski", "Ciechanowski", "Przemyski", "Krośnieński") #10
+lista_PL_UE[[7]] <- c("Nyski", "Olsztyński", "Słupski", "Chojnicki", "Elbląski", "Jeleniogórski", "Koszaliński", "Starogardzki", 
+                      "Grudziącki", "Płocki", "Świecki") #11
+lista_PL_UE[[8]] <- c("Szczeciński", "Wałbrzyski","Ełcki", "Radomski", "Włocławski", "Szczeciniecko-pyrzycki", "Inowrocławski") #7
 
 # PL GDP 2000, 2004, 2008, 2012, 2016, 2018
 lista_PL_GDP <-list()
