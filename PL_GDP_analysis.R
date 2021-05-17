@@ -25,7 +25,7 @@ theta0 <- list(rho = 0.5,
 hyperpar0 = list(alpha_prior = matrix(c(7, 3, 2, 8), nrow = 2, byrow = TRUE),
                  v_prior = 6,
                  delta_prior = 0.4,
-                 m_prior = matrix(c(3.5,15), nrow = 2),
+                 m_prior = matrix(c(-1,15), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -61,7 +61,7 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_"
 # pierwsza proba
 load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
 # druga proba
-load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
+load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_May17.RData")
 library(RColorBrewer)
 library(classInt)
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
@@ -95,82 +95,13 @@ v_p0<-posterior[,(3*n+2):(4*n+1)]
 v_p1<-posterior[,(4*n+2):(5*n+1)]
 v_rho<-posterior[,1]
 
-
-########### PRIORS for illustration
-library(grid)
-library(lattice)
-library(gridExtra)
-posterior <- posterior_a
-n<-n_regions
-#n<-n_states
-setwd("~/Desktop/Magisterka/Master_git/output")
-
-attach(hyperpar0)
-sigma_domain <- seq(from = 0, to = max(posterior[,(2*n+2):(3*n+1)]), by = 0.01)
-sigma_prior <- dinvgamma(sigma_domain, shape = v_prior/2, scale = delta_prior/2)
-m1_domain <- seq(from = min(posterior[,2:(n+1)]), to = max(posterior[,2:(n+1)]), by = 0.01)
-m0_domain <- seq(from = min(posterior[,(n+2):(2*n+1)]), to = max(posterior[,(n+2):(2*n+1)]), by = 0.01)
-m_domain <- seq(from = min(c(m0_domain, m1_domain)), to = max(c(m1_domain, m0_domain)), by = 0.01)
-m1_prior <- dnorm(m_domain, mean = m_prior[2], sd = M_prior[2,2]^0.5)
-m0_prior <- dnorm(m_domain, mean = m_prior[1], sd = M_prior[1,1]^0.5)
-p_domain <- seq(from = 0, to = 1, by = 0.01)
-p11_prior <- dbeta(p_domain, alpha_prior[2,2], alpha_prior[2,1])
-p00_prior <- dbeta(p_domain, alpha_prior[1,1], alpha_prior[1,2])
-
-lowerbound_rho <- 1/min(eigen(W)$values)
-lowerbound_rho2 <- -0.5
-rho_domain <- seq(from = lowerbound_rho2, to = 1, by = 0.01)
-rho_prior <- rep(1/(1-lowerbound_rho2), length(rho_domain))
-
-v_m1<-posterior[,2:(n+1)]
-v_m0<-posterior[,(n+2):(2*n+1)]
-v_omega<-posterior[,(2*n+2):(3*n+1)]
-v_p0<-posterior[,(3*n+2):(4*n+1)]
-v_p1<-posterior[,(4*n+2):(5*n+1)]
-v_rho<-posterior[,1]
 
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
-
-# 1
-load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
-# 2
-
-
+library(grid)
+library(lattice)
 library(RColorBrewer)
 library(classInt)
 library(gridExtra)
-path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
-path2<-"~/Desktop/Magisterka/Master_git/raw_maps/"
-path3<-"~/Desktop/Magisterka/Master_git/output/"
-posterior <- posterior_a
-n<-n_regions
-setwd("~/Desktop/Magisterka/Master_git/output")
-
-attach(hyperpar0)
-sigma_domain <- seq(from = 0, to = max(posterior[,(2*n+2):(3*n+1)]), by = 0.01)
-sigma_prior <- dinvgamma(sigma_domain, shape = v_prior/2, scale = delta_prior/2)
-m1_domain <- seq(from = min(posterior[,2:(n+1)]), to = max(posterior[,2:(n+1)]), by = 0.01)
-m0_domain <- seq(from = min(posterior[,(n+2):(2*n+1)]), to = max(posterior[,(n+2):(2*n+1)]), by = 0.01)
-m_domain <- seq(from = min(c(m0_domain, m1_domain)), to = max(c(m1_domain, m0_domain)), by = 0.01)
-m1_prior <- dnorm(m_domain, mean = m_prior[2], sd = M_prior[2,2]^0.5)
-m0_prior <- dnorm(m_domain, mean = m_prior[1], sd = M_prior[1,1]^0.5)
-p_domain <- seq(from = 0, to = 1, by = 0.01)
-p11_prior <- dbeta(p_domain, alpha_prior[2,2], alpha_prior[2,1])
-p00_prior <- dbeta(p_domain, alpha_prior[1,1], alpha_prior[1,2])
-
-lowerbound_rho <- 1/min(eigen(W)$values)
-lowerbound_rho2 <- -0.5
-rho_domain <- seq(from = lowerbound_rho2, to = 1, by = 0.01)
-rho_prior <- rep(1/(1-lowerbound_rho2), length(rho_domain))
-
-v_m1<-posterior[,2:(n+1)]
-v_m0<-posterior[,(n+2):(2*n+1)]
-v_omega<-posterior[,(2*n+2):(3*n+1)]
-v_p0<-posterior[,(3*n+2):(4*n+1)]
-v_p1<-posterior[,(4*n+2):(5*n+1)]
-v_rho<-posterior[,1]
-
-
 
 main_colour <- "navy"
 main_colour2<- "deeppink3"
@@ -371,7 +302,8 @@ draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
 }
 
 png(file = paste0("legend_effect_",country,"_",variable,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-draw_impulse_empty(PL_map,73,names,theta_posterior_means,W,e,r,1)
+#draw_impulse_empty(PL_map,73,names,theta_posterior_means,W,e,r,1)
+draw_impulse2(PL_map,73,names,theta_posterior_means, W, e, r, TRUE, 1)
 dev.off()
 
 

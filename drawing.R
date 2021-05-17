@@ -354,14 +354,16 @@ lista_PL_UE[[8]] <- c("Szczeciński", "Wałbrzyski","Ełcki", "Radomski", "Włoc
 # PL GDP 2000, 2004, 2008, 2012, 2016, 2018
 lista_PL_GDP <-list()
 lista_PL_GDP[[1]] <- c("Miasto Kraków", "Miasto Szczecin", "Miasto Wrocław", "Miasto Warszawa", "Miasto Poznań", "Miasto Łódź") #6
-lista_PL_GDP[[2]] <- c("Chojnicki", "Suwalski", "Bialski", "Ełcki", "Łomżyński", "Nowotarski", "Nyski", "Ostrołęcki", "Puławski", "Siedlecki", 
-"Słupski", "Skierniewicki", "Włocławski", "Ciechanowski", "Grudziądzki", "Inowrocławski", "Przemyski", "Świecki", 
-"Krośnieński", "Żyrardowski", "Gorzowski") # 20
-lista_PL_GDP[[3]] <- c("Bytomski", "Elbląski", "Jeleniogórski", "Koszaliński", "Łódzki", "Nowosądecki", "Pilski", "Sieradzki", "Starogardzki", 
-"Szczeciniecko-pyrzycki", "Szczeciński", "Tarnowski", "Radomski", "Chełmsko-zamojski", "Sandomiersko-jędrzejowski") #15
-lista_PL_GDP[[4]] <- c("Gliwicki", "Rybnicki", "Koniński", "Leszczyński", "Piotrkowski", "Rzeszowski", "Tarnobrzeski", "Tyski", "Wałbrzyski", 
-"Warszawski Wschodni", "Białostocki", "Gdański", "Olsztyński", "Opolski", "Oświęcimski", "Zielonogórski", 
-"Częstochowski", "Krakowski", "Płocki") #19
+lista_PL_GDP[[2]] <- c("Chojnicki", "Suwalski", "Bialski", "Ełcki", "Łomżyński", "Nowotarski", "Nyski",
+                       "Ostrołęcki", "Puławski", "Siedlecki") #10
+lista_PL_GDP[[3]] <- c("Słupski", "Skierniewicki", "Włocławski", "Ciechanowski", "Grudziądzki", "Inowrocławski", "Przemyski", "Świecki", 
+"Krośnieński", "Żyrardowski", "Gorzowski") # 11
+lista_PL_GDP[[4]] <- c("Bytomski", "Elbląski", "Jeleniogórski", "Koszaliński", "Łódzki", "Nowosądecki", "Pilski", "Sieradzki", "Starogardzki", 
+"Szczeciniecko-pyrzycki", "Szczeciński", "Tarnowski") #12
+lista_PL_GDP[[4]] <- c("Radomski", "Chełmsko-zamojski", "Sandomiersko-jędrzejowski","Warszawski Wschodni", 
+"Białostocki", "Gdański", "Olsztyński", "Opolski", "Oświęcimski", "Zielonogórski") #10
+lista_PL_GDP[[4]] <- c("Gliwicki", "Rybnicki", "Koniński", "Leszczyński", "Piotrkowski", "Rzeszowski", "Tarnobrzeski", 
+                       "Tyski", "Wałbrzyski", "Częstochowski", "Krakowski", "Płocki") #12
 lista_PL_GDP[[5]] <- c("Legnicko-głogowski", "Lubelski", "Bydgosko-toruński", "Kaliski", "Kielecki", "Poznański", "Wrocławski", "Sosnowiecki", 
 "Warszawski Zachodni", "Bielski") #10
 lista_PL_GDP[[6]] <- c("Katowicki", "Trójmiejski") # 2

@@ -164,7 +164,7 @@ relist <- function(theta_vector, N) {
   return(theta)
 }
 
-sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_phi, Y, Yl, W) {
+sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, Yl, W) {
   
   #Step 0: imply from arguments and initialize result matrix
   N <- ncol(Y)
@@ -241,7 +241,6 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
     }
     
     #Step 7: rho (M-H)
-    S_rho<-100
     simul_rho <- rep(NA, S_rho)
     simul_phi <- rep(NA, S_rho)
     acceptance_p <- rep(NA, S_rho-1)
@@ -257,7 +256,7 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
     while(MH_accepted == FALSE) {
       
       if(is.na(acceptance_p[1])) {
-        c <- 0.02
+        c <- 0.01
         print(paste0("Initiating c to ", c))
       } else {
         if(mean(acceptance_p) < 0.2) {
@@ -270,14 +269,14 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
         }
         if(mean(acceptance_p) >= 0.2 && mean(acceptance_p) <= 0.4) {
           MH_accepted <- TRUE
-          print(paste0("Terminating procedure for rho and phi with c=", c, " and avg accept p = ", mean(acceptance_p)))
+          print(paste0("Terminating procedure for rho and phi with c =", c, " and avg accept p = ", mean(acceptance_p)))
         }
       }
       
       if(MH_accepted == FALSE) {
         for (sr in 2:S_rho) {
           rho_candidate <- rtruncnorm(1, a=lowerbound_rho, b=1, mean = simul_rho[sr-1], sd = c)
-          phi_candidate <- rtruncnorm(1, a=-1, b=1, mean = simul_phi[sr-1], sd = c*1)
+          phi_candidate <- rtruncnorm(1, a=-1, b=1, mean = simul_phi[sr-1], sd = c*0.1)
           theta_cand[[1]] <- rho_candidate
           theta_cand[[2]] <- phi_candidate
           log_post_now <- MH_posterior_cond(Y, Yl, S_simul, theta_now, W)
