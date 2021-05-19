@@ -22,10 +22,10 @@ theta0 <- list(rho = 0.5,
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
 
-hyperpar0 = list(alpha_prior = matrix(c(7, 3, 2, 8), nrow = 2, byrow = TRUE),
+hyperpar0 = list(alpha_prior = matrix(c(8, 2, 2, 8), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 0.4,
-                 m_prior = matrix(c(-1,15), nrow = 2),
+                 delta_prior = 100,
+                 m_prior = matrix(c(1,10), nrow = 2),
                  M_prior = diag(2))
 
 
@@ -62,6 +62,8 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_"
 load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
 # druga proba
 load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_May17.RData")
+# trzecia proba
+load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_maj19.RData")
 library(RColorBrewer)
 library(classInt)
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
