@@ -10,7 +10,10 @@ source("MC_MG_HF_functions.R")
 
 load("~/Desktop/Magisterka/Master_git/Master_git_2/dane/danedane.RData")
 
+# wersja phi=0
 load("~/Desktop/Magisterka/Master_git/Master_git_2/post_simul/posteriorT_PL_UE_maj19.RData")
+#wersja phi=0.5
+load("/Users/agnieszka/Desktop/Magisterka/Master_git/Master_git_2/post_simul/posteriorT_PL_UE_maj20.RData")
 
 ## preparing matryx Y for unemployment rate in Poland
 dftemp<-PL_UE_ch
@@ -23,7 +26,7 @@ table(is.na(Y))
 ######################### PARAMETRY DLA PL GDP  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
-               phi = 0.5,
+               phi = 0.5, # phi = 0
                mu_1 = rep(12, N),
                mu_0 = rep(-1, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
@@ -38,7 +41,7 @@ hyperpar0 = list(alpha_prior = matrix(c(7, 3, 2, 8), nrow = 2, byrow = TRUE),
 
 
 start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 100, S0_rho = 10, S_phi = 100, S0_phi = 10, Y = Y, Yl = Y_lag, W = W)
+posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, Yl = Y_lag, W = W)
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/Master_git_2/post_simul/posterior2_PL_GDP_", format(Sys.time(), "%b%d"), ".RData"))
@@ -64,31 +67,6 @@ posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/Master_git_2/post_simul/posterior_PL_UE_", format(Sys.time(), "%b%d"), ".RData"))
-
-
-
-######################### PARAMETRY DLA USA GDP  ##########
-N <- n_states
-theta0 <- list(rho = 0.5,
-               phi = 0.5,
-               mu_1 = rep(4, N),
-               mu_0 = rep(2.3, N),
-               omega_d = rep(1, N), #VARIANCES (already squared)
-               p_00 = rep(0.8, N),
-               p_11 = rep(0.8, N))
-
-hyperpar0 = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
-                 v_prior = 6,
-                 delta_prior = 2,  ## changed from 0.4
-                 m_prior = matrix(c(2.3,4), nrow = 2),
-                 M_prior = diag(2))
-
-
-start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, Y=Y_lag W = W)
-end <- Sys.time()
-print(end - start)
-save.image(paste0("~/Desktop/Magisterka/Master_git/Master_git_2/post_simul/posterior_USA_GDP_", format(Sys.time(), "%b%d"), ".RData"))
 
 
 ############ POSTERIOR SIMULATION #################################
@@ -279,7 +257,7 @@ for (i in 1:pages){
 }
 
   
-write.table(rbind(rho.sum,phi.sum), file = paste0("rho&phi_results_",country,variable,"_t.csv"), sep = ";", dec = ",")
+write.table(rbind(rho.sum,phi.sum), file = paste0("rho&phi_results_",country,variable,"_t05.csv"), sep = ";", dec = ",")
 
 ############### TWORZENEI RYSUNKÓW IMPULSU - indywidualnie dla każdego zestawu
 nclr<-9
@@ -295,8 +273,8 @@ vec_e<-c(e)
 breaks_qt <- classIntervals(vec_e, 2, n = nclr, style = "equal")
 r <- breaks_qt$brks 
 # choice of folder to keep maps
-n_col<-3
-n_row<-5
+n_col<-4
+n_row<-6
 m<- n_col*n_row
 pages<-ceiling(N/m)
 pal<-c()
@@ -308,7 +286,7 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
   map@data$bracket <- cut(map@data$response, r)
-  spplot(map, "bracket", lwd=0.1, col.regions=pal,colorkey=legend,
+  spplot(map, "bracket", lwd=0.1, col.regions=rev(pal),colorkey=legend,
          par.settings = list(axis.line = list(col =  'transparent')),
          main = list(label=n[i],cex=0.8,fontfamily="serif"))
 }
@@ -322,7 +300,7 @@ draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
   map@data$bracket <- cut(map@data$response, r)
-  s<-spplot(map, "bracket", lwd=0, col.regions=pal,
+  s<-spplot(map, "bracket", lwd=0, col.regions=rev(pal),
             colorkey=list(space='left',height = 2,width =4),
             par.settings = list(axis.line = list(col =  'transparent')),
             main = list(label='',cex=1,fontfamily="serif"))
@@ -347,14 +325,13 @@ png(file = paste0("legend_effect_",country,"_",variable,"_t.png"), width = 3, he
 draw_impulse2(PL_map,73,names,theta_posterior_means, W, e, r, TRUE, 1)
 dev.off()
 
-setwd(path3)
-## UNEMPLOYMENT RATE IN USA
+## UNEMPLOYMENT RATE IN PL
 for (page in 1:pages){
   if (m+(page-1)*(m-1)>N){
     dif<- m - (N-(m+(page-1)*(m-1))+1)
     temp<-seq(1+(page-1)*(m-1),N)
     png(file = paste0("effect_",country,variable,"_",page,"_t.png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse2(PL_map,48,names,theta_posterior_means, W, e, r, FALSE, .x))
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means, W, e, r, FALSE, .x))
     p<-marrangeGrob(plots, nrow=n_row, ncol=n_col)
     print(p)
     dev.off()
@@ -362,8 +339,9 @@ for (page in 1:pages){
     temp<-seq(1+(page-1)*(m-1), m+(page-1)*(m-1)-1)
     #temp<-seq(1, 15)
     png(file = paste0("effect_",country,variable,"_",page,"_t.png"), width = 8.27, height = 11.69, units ="in",res=300)
-    plots = lapply(temp, function(.x) draw_impulse2(PL_map,48,names,theta_posterior_means,W,e,r,FALSE,.x))
-    do.call(grid.arrange,plots)
+    plots = lapply(temp, function(.x) draw_impulse2(PL_map,73,names,theta_posterior_means,W,e,r,FALSE,.x))
+    p<-marrangeGrob(plots, nrow=n_row, ncol=n_col)
+    print(p)
     dev.off()
   }
 }

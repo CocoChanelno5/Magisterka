@@ -132,7 +132,7 @@ main_colour2<- "deeppink3"
 ########### ILLUSTRATE POSTERIORS (TOTAL) ##############
 N <- ncol(Y)
 map<-USA_map
-map@data$names<-colnames(Y)
+map@data$names<-map@data$NAME
 setwd("~/Desktop/Magisterka/Master_git/Master_git_2/output")
 n_col<-4
 n_row<-7
@@ -140,7 +140,7 @@ m<- n_col*n_row
 variable<-'GDP'
 country<-'USA'
 cex<-1
-names<-colnames(Y)
+names<-map@data$NAME
 N<-length(colnames(Y))
 pages<-ceiling(N/m)
 
@@ -153,11 +153,11 @@ for (i in 1:pages){
   for (pp in 1:m) {
     pp<-pp+(page-1)*m
     if (pp<=N){    
-      hist(v_m1[,pp], freq = FALSE, main = colnames(Y)[pp], border=rgb(1, 1, 1, 0, maxColorValue = 1),
+      hist(v_m1[,pp], freq = FALSE, main = names[pp], border=rgb(1, 1, 1, 0, maxColorValue = 1),
            xlab = NULL, ylab = NULL, nclass = 20, col="skyblue4",#col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
            xlim = c(min(m_domain), max(m_domain)), #ylim = c(0,1.5), 
            cex.main = cex, cex.axis = cex/1.2,tck=-0.02)
-      hist(v_m0[,pp], freq = FALSE, main = colnames(Y)[pp], border=rgb(1, 1, 1, 0, maxColorValue = 1),
+      hist(v_m0[,pp], freq = FALSE, main = names[pp], border=rgb(1, 1, 1, 0, maxColorValue = 1),
            xlab = NULL, ylab = NULL, nclass = 20, col = rgb(1, 0, 0, 0.5, maxColorValue = 1),
            xlim = c(min(m_domain), max(m_domain)), #ylim = c(0,1.5), 
            cex.main = cex, cex.axis = cex/1.2, add = TRUE)
