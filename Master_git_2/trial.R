@@ -15,15 +15,15 @@ hyperpar = list(alpha_prior = matrix(c(8, 2, 1, 9), nrow = 2, byrow = TRUE),
 
 S = 5000
 S0 = 1000
-S_rho = 100
-S0_rho = 10
+S_rho = 2000
+S0_rho = 200
 S_phi = 100
 S0_phi = 10
 Y = Y
 Yl = Y_lag
 W = W
 
-sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_phi, Y, Yl, W) {
+sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, Yl, W) {
   
   #Step 0: imply from arguments and initialize result matrix
   N <- ncol(Y)
@@ -158,9 +158,19 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, S_phi, S0_
     
     simul_rho <- simul_rho[(S0_rho+1):length(simul_rho)]
     draw_rho <- simul_rho[ceiling(runif(1, min = 0, max = length(simul_rho)))]
+    plot( simul_rho, type="s", xpd=NA, ylab="Parameter", xlab="Sample", las=1)
+    hist(simul_rho, 50, freq=FALSE, main="", las=1,
+         xlab="x", ylab="Probability density")
+    
+    library(coda)
+    geweke.plot(simul_rho, frac1 = 0.1, frac2 = 0.5,
+                nbins=40, pvalue=0.05)
     
     simul_phi <- simul_phi[(S0_rho+1):length(simul_phi)]
     draw_phi <- simul_phi[ceiling(runif(1, min = 0, max = length(simul_phi)))]
+    plot( simul_phi, type="s", xpd=NA, ylab="Parameter", xlab="Sample", las=1)
+    hist(simul_phi, 50, freq=FALSE, main="", las=1,
+         xlab="x", ylab="Probability density")
     
     simulation[ss, 1] <- draw_rho
     simulation[ss, 2] <- draw_phi

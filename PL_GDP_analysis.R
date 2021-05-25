@@ -64,6 +64,9 @@ load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_504.RData")
 load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_May17.RData")
 # trzecia proba
 load("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_maj19.RData")
+# czwarta proba
+load("/Users/agnieszka/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_maj25.rdata")
+
 library(RColorBrewer)
 library(classInt)
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
@@ -172,7 +175,7 @@ for (i in 1:pages){
 }
 
 ### ILLUSTRATE RHO
-title="Stopa bezrobocia w Polsce"
+title=""
 #rho
 png(file = paste0("rho_",country,"_",variable,".png"), width = 400, height = 400)
 
@@ -245,7 +248,7 @@ for (i in 1:pages){
 }
 
 #pal <- colorRampPalette(c("white", main_colour2), bias = 1)
-nclr<-9
+nclr<-6
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -266,7 +269,7 @@ pal<-c()
 
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(9, "Oranges")
+  pal <- brewer.pal(6, "Oranges")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -278,7 +281,7 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
 
 draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(9, "Oranges")
+  pal <- brewer.pal(5, "Oranges")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])

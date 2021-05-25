@@ -226,7 +226,7 @@ for (pp in 1:N) {
   e<-cbind(e,effect)}
 effect_mean<-mean(e)
 vec_e<-c(e)
-breaks_qt <- classIntervals(vec_e,2, n = nclr, style = "equal")
+breaks_qt <- classIntervals(vec_e,2, n = nclr, style = "quantile")
 r <- breaks_qt$brks 
 # choice of folder to keep maps
 n_col<-4
@@ -273,7 +273,8 @@ draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
   ## Prepare list of arguments needed by `legend=` argument (as described in ?xyplot)
   legendArgs <- list(fun = draw.colorkey,
                      args = list(key = args),
-                     corner = c(0.5,.5))
+                     corner = c(0.5,.5),
+                     fontfamily="serif")
   ## Call spplot() again, this time passing in to legend the arguments
   ## needed to print a color key
   spplot(USA_map, "ID", colorkey =FALSE,

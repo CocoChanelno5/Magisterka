@@ -297,6 +297,9 @@ for (page in 1:pages){
   }
 }
 
+write.table(rho.sum, file = paste0("rho_results_",country,"_",variable,".csv"), sep = ";", dec = ",")
+
+
 compare<-function(map,N,n,theta,W,ef,r,legend,c,i){
   ifelse(i==max(c),
                 draw_impulse_empty(map,N,n,theta,W,ef,r,1),
@@ -320,4 +323,3 @@ grid.draw(key)
 plots$legend
 
 
-write.table(rho.sum, file = paste0("rho_results_",country,"_",variable,".csv"), sep = ";", dec = ",")

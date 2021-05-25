@@ -88,7 +88,7 @@ save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_"
 N <- n_regions
 theta0 <- list(rho = 0.5,
                mu_1 = rep(-1.3, N),
-               mu_0 = rep(-0.2, N),
+               mu_0 = rep(0.2, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
@@ -170,6 +170,7 @@ library(grid)
 library(lattice)
 library(gridExtra)
 setwd("~/post_simul/")
+load("/Users/agnieszka/Desktop/Magisterka/Master_git/post_simul/posterior_PL_UE_Apr12.RData")
 posterior <- posterior_a
 n<-n_regions
 #n<-n_states
@@ -208,7 +209,7 @@ cex<-1
 n_col<-4
 n_row<-7
 m<- n_col*n_row
-unique(PL_GDP_ch$Name)
+unique(PL_UE_ch$Name)
 colnames(Y) <- unique(PL_UE_ch$Name)
 names<-colnames(Y)
 N<-length(colnames(Y))
@@ -267,7 +268,7 @@ for (i in 1:pages){
 }
 
 ### ILLUSTRATE RHO
-title="Stopa bezrobocia w Polsce"
+title=""
 #rho
 png(file = paste0("rho_",country,"_",variable,".png"), width = 400, height = 400)
 
@@ -340,7 +341,7 @@ for (i in 1:pages){
 
 
 ############### TWORZENEI RYSUNKÓW IMPULSU - indywidualnie dla każdego zestawu
-nclr<-9
+nclr<-5
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -353,7 +354,7 @@ vec_e<-c(e)
 breaks_qt <- classIntervals(vec_e,2, n = nclr, style = "equal")
 r <- breaks_qt$brks 
 # choice of folder to keep maps
-n_col<-3
+n_col<-4
 n_row<-5
 m<- n_col*n_row
 pages<-ceiling(N/m)
@@ -361,12 +362,12 @@ pal<-c()
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   #pp<-1
   #theta<-theta_posterior_means
-  nclr<-9
+  nclr<-5
   #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  pal[1:7] <- brewer.pal(7, "PuBuGn")
+  pal[1:4] <- brewer.pal(4, "PuBuGn")
   pal<-rev(pal)
-  pal[8:10] <- brewer.pal(4, "Oranges")[2:4]
+  pal[5] <- brewer.pal(2, "Oranges")[2]
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -376,38 +377,8 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
          main = list(label=n[i],cex=0.8,fontfamily="serif"))
 }
 
-draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
-  nclr<-9
-  #pal <- colorRampPalette(c("white", "black"), bias = 1)
-  impulse <- theta$mu_1 - theta$mu_0
-  pal[1:7] <- brewer.pal(7, "PuBuGn")
-  pal<-rev(pal)
-  pal[8:10] <- brewer.pal(4, "Oranges")[2:4]
-  impulse2 <- as.matrix(rep(0,N))
-  impulse2[i] <- impulse[i]
-  map@data$response <- as.vector(ef[,i])
-  map@data$bracket <- cut(map@data$response, r)
-  s<-spplot(map, "bracket", lwd=0, col.regions=pal,
-            colorkey=list(space='left',height = 2,width =6),
-            par.settings = list(axis.line = list(col =  'transparent')),
-            main = list(label='',cex=0.8,fontfamily="serif"))
-
-  args <- s$legend$left$args$key
-  ## Prepare list of arguments needed by `legend=` argument (as described in ?xyplot)
-  legendArgs <- list(fun = draw.colorkey,
-                     args = list(key = args),
-                     corner = c(0.5,.5))
-  ## Call spplot() again, this time passing in to legend the arguments
-  ## needed to print a color key
-  spplot(map, "ID", colorkey =FALSE,
-         panel=function(x, y, ...){
-           panel.rect(xleft=180000, ybottom=330000,
-                      xright=181000, ytop=330500, alpha=1)},lwd=0, par.settings = list(axis.line = list(col =  'transparent')),
-         legend = list(inside = legendArgs,cex=5))
-}
-
 png(file = paste0("legend_effect_",country,"_",variable,".png"), width = 8.27, height = 11.69, units ="in",res=300)
-draw_impulse_empty(PL_map,73,names,theta_posterior_means,W,e,r,1)
+draw_impulse2(PL_map,73,names,theta_posterior_means, W, e, r, TRUE, 1)
 dev.off()
 
 setwd(path3)

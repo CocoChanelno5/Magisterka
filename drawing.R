@@ -147,13 +147,13 @@ draw_timelines_selected<-function(dataset, lista, rows, columns,text, variable, 
     labs(color = "Podregiony:",face="bold") +
     theme(plot.margin = margin(0.3, 0.3, 0.3, 0.3, "cm"),
           legend.margin = margin(0.2, 0.2, 0.2, 0.2, "cm"),
-          axis.title.x = element_text(size = 6, family = f),
-          axis.title.y = element_text(size = 6, family = f),
+          axis.title.x = element_text(size = 8, family = f),
+          axis.title.y = element_text(size = 8, family = f),
           #plot.title=element_text(hjust=1, vjust=0.5, face='bold',size = 5,family = f),
-          axis.text.x = element_text(size = 6, family = f),
-          axis.text.y = element_text(size = 6, family = f),
-          legend.text = element_text(size = 5, family = f),
-          legend.title = element_text(size = 6, family = f),
+          axis.text.x = element_text(size = 8, family = f),
+          axis.text.y = element_text(size = 8, family = f),
+          legend.text = element_text(size = 6, family = f),
+          legend.title = element_text(size = 7, family = f),
           legend.position = "right",
           legend.key.size = unit(0.5, "cm"),
           legend.key.width = unit(0.5,"cm"))
@@ -168,7 +168,7 @@ dev.off()
 
 draw_timelines_selected(PL_UE, lista_PL_UE, 4, 2,"BEZR_PL_sel","'stopa bezrobocia'", 
                         div=1, width = 8.27,height = 11.69)
-draw_timelines_selected(PL_GDP, lista_PL_GDP, 3, 2,"GDP_PL_sel","'PKB'", 
+draw_timelines_selected(PL_GDP, lista_PL_GDP, 4, 2,"GDP_PL_sel","'PKB'", 
                         div=1000, width = 8.27,height = 11.69)
 draw_timelines_selected(USA_UE, lista_USA_UE, 3, 2,"BEZR_USA_sel","'stopa bezrobocia'", 
                         div=1, width = 8.27,height = 8.27)
@@ -261,7 +261,7 @@ require(gridExtra)
 temp<-unique(year(PL_UE$Date))
 png(file = paste0("mapM_BEZR_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
 temp<-c(2011, 2013, 2015, 2017, 2019, 2021)
-png(file = paste0("mapselM_BEZR_PL.png"), width = 8.27, height = 8.27, units ="in",res=300)
+png(file = paste0("mapselM_BEZR_PL.png"), width = 8.27, height = 11.69, units ="in",res=300)
 plots = lapply(temp, function(.x) draw_raw_matrixMaps(PL_UE,PL_map,"'stopa bezrobocia'",8,1,"OrRd",.x,FALSE,"equal",temp))
 do.call(grid.arrange,c(plots, ncol=3))
 dev.off()
@@ -360,24 +360,25 @@ lista_PL_GDP[[3]] <- c("Słupski", "Skierniewicki", "Włocławski", "Ciechanowsk
 "Krośnieński", "Żyrardowski", "Gorzowski") # 11
 lista_PL_GDP[[4]] <- c("Bytomski", "Elbląski", "Jeleniogórski", "Koszaliński", "Łódzki", "Nowosądecki", "Pilski", "Sieradzki", "Starogardzki", 
 "Szczeciniecko-pyrzycki", "Szczeciński", "Tarnowski") #12
-lista_PL_GDP[[4]] <- c("Radomski", "Chełmsko-zamojski", "Sandomiersko-jędrzejowski","Warszawski Wschodni", 
+lista_PL_GDP[[5]] <- c("Radomski", "Chełmsko-zamojski", "Sandomiersko-jędrzejowski","Warszawski Wschodni", 
 "Białostocki", "Gdański", "Olsztyński", "Opolski", "Oświęcimski", "Zielonogórski") #10
-lista_PL_GDP[[4]] <- c("Gliwicki", "Rybnicki", "Koniński", "Leszczyński", "Piotrkowski", "Rzeszowski", "Tarnobrzeski", 
+lista_PL_GDP[[6]] <- c("Gliwicki", "Rybnicki", "Koniński", "Leszczyński", "Piotrkowski", "Rzeszowski", "Tarnobrzeski", 
                        "Tyski", "Wałbrzyski", "Częstochowski", "Krakowski", "Płocki") #12
-lista_PL_GDP[[5]] <- c("Legnicko-głogowski", "Lubelski", "Bydgosko-toruński", "Kaliski", "Kielecki", "Poznański", "Wrocławski", "Sosnowiecki", 
+lista_PL_GDP[[7]] <- c("Legnicko-głogowski", "Lubelski", "Bydgosko-toruński", "Kaliski", "Kielecki", "Poznański", "Wrocławski", "Sosnowiecki", 
 "Warszawski Zachodni", "Bielski") #10
-lista_PL_GDP[[6]] <- c("Katowicki", "Trójmiejski") # 2
+lista_PL_GDP[[8]] <- c("Katowicki", "Trójmiejski") # 2
 
 
 
 #################### function which draws the map with colours according to Value for one period
-draw_map_variable <- function(map, data, cut, variable, year, title,kolorki) {
+draw_map_variable <- function(map, data, cut, variable, year, title, kolorki) {
   
   data<-filter(data,Period==year)
   sp <- merge(x = map, y = data, by.x = "ID", by.y = "ID")
   text<-list("sp.text", coordinates(sp), as.character(sp@data$Name),col="black", cex=0.5,font=1)
   drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut) 
-                  ,cuts = cut,sp.layout = list(text),do.log=TRUE,
+                  ,cuts = cut, #sp.layout = list(text),
+                  do.log=TRUE,
                   par.settings = list(axis.line = list(col =  'transparent')),
                   main = list(label=paste("Podział",title),cex=0.8,fontfamily=f))
                   #main = paste("Wartości",title,"w roku",year))
@@ -394,8 +395,9 @@ draw_usamap_variable <- function(map, data, cut, variable, year, per, title, kol
   data<-data%>%filter(Year==year)%>%filter(Month==per)
   sp <- merge(y = data, x = map, by.y = "Name", by.x = "NAME")
   text<-list("sp.text", coordinates(sp), as.character(sp@data$NAME),col="black", cex=0.5,font=1.5)
-  drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut) 
-                  ,cuts = cut,sp.layout = list(text),do.log=TRUE,
+  drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut)
+                  ,cuts = cut,#sp.layout = list(text)
+                  do.log=TRUE,
                   par.settings = list(axis.line = list(col =  'transparent')),
                   main = list(label=title,cex=0.8,fontfamily=f))
                   #main = paste0("Wartości ",title,"w roku ",year," w miesiącu ",per))
