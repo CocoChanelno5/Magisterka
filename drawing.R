@@ -376,8 +376,9 @@ draw_map_variable <- function(map, data, cut, variable, year, title, kolorki) {
   data<-filter(data,Period==year)
   sp <- merge(x = map, y = data, by.x = "ID", by.y = "ID")
   text<-list("sp.text", coordinates(sp), as.character(sp@data$Name),col="black", cex=0.5,font=1)
-  drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut) 
-                  ,cuts = cut, #sp.layout = list(text),
+  drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut) ,
+                  ,col="gray50",
+                  cuts = cut, #sp.layout = list(text),
                   do.log=TRUE,
                   par.settings = list(axis.line = list(col =  'transparent')),
                   main = list(label=paste("Podział",title),cex=0.8,fontfamily=f))
@@ -386,7 +387,7 @@ draw_map_variable <- function(map, data, cut, variable, year, title, kolorki) {
 }
 
 png(file = paste0("map_names_PL.png"), width = 4, height = 4, units ="in",res=300)
-draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2000, "Polski na 73 regiony","white")
+draw_map_variable(PL_map, PL_GDP, cuts-1, "Value", 2000, "Polski na 73 regiony","gray95")
 dev.off()
 
 draw_usamap_variable <- function(map, data, cut, variable, year, per, title, kolorki) {
@@ -398,6 +399,7 @@ draw_usamap_variable <- function(map, data, cut, variable, year, per, title, kol
   drawing<-spplot(sp, zcol = variable, colorkey = FALSE, col.regions = kolorki#(cut)
                   ,cuts = cut,#sp.layout = list(text)
                   do.log=TRUE,
+                  col="gray50",
                   par.settings = list(axis.line = list(col =  'transparent')),
                   main = list(label=title,cex=0.8,fontfamily=f))
                   #main = paste0("Wartości ",title,"w roku ",year," w miesiącu ",per))
@@ -405,7 +407,7 @@ draw_usamap_variable <- function(map, data, cut, variable, year, per, title, kol
 }
 
 png(file = paste0("map_names_USA.png"), width = 4, height = 4, units ="in",res=300)
-draw_usamap_variable(USA_map, USA_UE, 1, "Value", 2010,1,"Podział USA na 48 stany", "white")
+draw_usamap_variable(USA_map, USA_UE, 1, "Value", 2010,1,"Podział USA na 48 stany", "gray95")
 dev.off()
 
 

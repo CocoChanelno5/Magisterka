@@ -163,7 +163,9 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, Yl, W) 
          xlab="x", ylab="Probability density")
     
     library(coda)
-    geweke.plot(simul_rho, frac1 = 0.1, frac2 = 0.5,
+    
+    mh.draws <- mcmc(simul_rho)
+    geweke.plot(mh.draws, frac1 = 0.1, frac2 = 0.5,
                 nbins=40, pvalue=0.05)
     
     simul_phi <- simul_phi[(S0_rho+1):length(simul_phi)]

@@ -155,6 +155,8 @@ df$MEAN<-rowMeans(df[,3:ncol(df)],na.rm=TRUE)
 df$MIN<-apply(df[,3:ncol(df)],1,FUN=min,na.rm=TRUE)
 df$MAX<-apply(df[,3:ncol(df)],1,FUN=max,na.rm=TRUE)
 
+PL_names <-
+
 PL_GDP <- df %>%
   pivot_longer(
     cols = starts_with("2"),
