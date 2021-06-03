@@ -16,21 +16,21 @@ table(is.na(Y))
 ######################### PARAMETRY DLA PL GDP  ##########
 N <- n_regions
 theta0 <- list(rho = 0.5,
-               mu_1 = rep(9.5, N),
-               mu_0 = rep(3.5, N),
+               mu_1 = rep(10, N),
+               mu_0 = rep(1, N),
                omega_d = rep(1, N), #VARIANCES (already squared)
                p_00 = rep(0.8, N),
                p_11 = rep(0.8, N))
 
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 2, 8), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 100,
+                 delta_prior = 50,
                  m_prior = matrix(c(1,10), nrow = 2),
                  M_prior = diag(2))
 
 
 start <- Sys.time()
-posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 1000, S0_rho = 100, Y = Y, W = W)
+posterior_a <- sample_posterior(initial = theta0, hyperpar = hyperpar0, S = 5000, S0 = 1000, S_rho = 3000, S0_rho = 300, Y = Y, W = W)
 end <- Sys.time()
 print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_PL_GDP_", format(Sys.time(), "%b%d"), ".RData"))
@@ -45,7 +45,7 @@ theta0 <- list(rho = 0.5,
 
 hyperpar0 = list(alpha_prior = matrix(c(8, 2, 2, 8), nrow = 2, byrow = TRUE),
                  v_prior = 6,
-                 delta_prior = 0.4,
+                 delta_prior = 10,
                  m_prior = matrix(c(10,15), nrow = 2),
                  M_prior = diag(2))
 

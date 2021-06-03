@@ -158,15 +158,21 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, Yl, W) 
     
     simul_rho <- simul_rho[(S0_rho+1):length(simul_rho)]
     draw_rho <- simul_rho[ceiling(runif(1, min = 0, max = length(simul_rho)))]
-    plot( simul_rho, type="s", xpd=NA, ylab="Parameter", xlab="Sample", las=1)
-    hist(simul_rho, 50, freq=FALSE, main="", las=1,
-         xlab="x", ylab="Probability density")
-    
-    library(coda)
-    
-    mh.draws <- mcmc(simul_rho)
-    geweke.plot(mh.draws, frac1 = 0.1, frac2 = 0.5,
-                nbins=40, pvalue=0.05)
+    if (ss==S-500){
+      png(file = paste0("trace_rho_",ss,".png"), width = 300, height = 300)
+      plot( simul_rho, type="s", xpd=NA, ylab="Parameter", xlab="Sample", las=1)
+      hist(simul_rho, 50, freq=FALSE, main="", las=1,
+           xlab="x", ylab="Probability density")
+      library(coda)
+      
+      mh.draws <- mcmc(simul_rho)
+      png(file = paste0("geweke_plot_",ss,".png"), width = 300, height = 300)
+      geweke.plot(mh.draws, frac1 = 0.1, frac2 = 0.5,
+                  nbins=40, pvalue=0.05)
+      dev.off()
+
+      conv_test<-summary(mh.draws)
+      }
     
     simul_phi <- simul_phi[(S0_rho+1):length(simul_phi)]
     draw_phi <- simul_phi[ceiling(runif(1, min = 0, max = length(simul_phi)))]
@@ -180,8 +186,10 @@ sample_posterior <- function(initial, hyperpar, S, S0, S_rho, S0_rho, Y, Yl, W) 
     print(paste0("### Iteration ", ss))
     
   }
-  
-  return(simulation[(S0+1):nrow(simulation),])
+  output<-list()
+  output$simul <- simulation[(S0+1):nrow(simulation),]
+  output$convergence <- conv_test
+  return(output)
 }
 
 MH_posterior_cond <- function(Y, Yl, S, theta, W) {

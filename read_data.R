@@ -1,5 +1,6 @@
 setwd("~/Desktop/Magisterka/Master_git")
 source("MC_MG_HF_functions.R")
+source("MC_MG_HF__conv_functions.R")
 
 # file ALL_USA_PL
 # sheets:
@@ -31,7 +32,7 @@ W_USA<- matrix_W_distance(USA_map)
 df<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
            sheet="PL_%BEZR")
 id_list<-read_excel("~/Desktop/Magisterka/Master_git/dane/ALL_USA_PL.xlsx",
-               sheet="PL_regiony")
+               sheet="PL_regiony")[,1:3]
 temp<-data.frame(ID=colnames(W_PL))
 temp<-merge(x=temp, y=id_list,by.x="ID",by.y="ID")
 df<-merge(x=temp, y=df,by.x="NAME",by.y="Name")
