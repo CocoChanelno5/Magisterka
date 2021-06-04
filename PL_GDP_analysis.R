@@ -72,7 +72,7 @@ library(classInt)
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
 path2<-"~/Desktop/Magisterka/Master_git/raw_maps/"
 path3<-"~/Desktop/Magisterka/Master_git/output/"
-posterior <- posterior_a
+posterior <- posterior_a$simul
 n<-n_regions
 #n<-n_states
 setwd("~/Desktop/Magisterka/Master_git/output")
@@ -110,7 +110,7 @@ library(gridExtra)
 
 main_colour <- "navy"
 main_colour2<- "deeppink3"
-variable<-'GDP'
+variable<-'GDP7'
 country<-'PL'
 cex<-1
 n_col<-4
@@ -179,7 +179,7 @@ title=""
 #rho
 png(file = paste0("rho_",country,"_",variable,".png"), width = 400, height = 400)
 
-hist(v_rho, freq = FALSE, #main = title, 
+hist(v_rho, freq = FALSE, main = "", 
      xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
      #xlim = c(lowerbound_rho2, 1), #ylim = c(0, 15), 
      cex.main = cex, cex.axis = cex/1.7)
@@ -248,7 +248,7 @@ for (i in 1:pages){
 }
 
 #pal <- colorRampPalette(c("white", main_colour2), bias = 1)
-nclr<-6
+nclr<-9
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -269,7 +269,7 @@ pal<-c()
 
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(6, "Oranges")
+  pal <- brewer.pal(9, "Oranges")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -281,7 +281,7 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
 
 draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(5, "Oranges")
+  pal <- brewer.pal(9, "Oranges")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
