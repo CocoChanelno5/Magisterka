@@ -41,7 +41,7 @@ library(classInt)
 path<-"~/Desktop/Magisterka/Master_git/raw_maps/map"
 path2<-"~/Desktop/Magisterka/Master_git/raw_maps/"
 path3<-"~/Desktop/Magisterka/Master_git/output/"
-posterior <- posterior_a
+posterior <- posterior_a$simul
 n<-n_states
 setwd("~/Desktop/Magisterka/Master_git/output")
 attach(hyperpar0)
@@ -136,9 +136,9 @@ for (i in 1:pages){
 ### ILLUSTRATE RHO
 title="Stopa bezrobocia w Polsce"
 #rho
-png(file = paste0("rho_",country,"_",variable,".png"), width = 400, height = 400)
+png(file = paste0("rho_",country,"_",variable,".png"), width = 5,height = 5, units ="in", res=300)
 
-hist(v_rho, freq = FALSE, #main = title, 
+hist(v_rho, freq = FALSE, main = "", 
      xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
      #xlim = c(lowerbound_rho2, 1), #ylim = c(0, 15), 
      cex.main = cex, cex.axis = cex/1.7)
@@ -203,7 +203,7 @@ for (i in 1:pages){
 
 
 ############### TWORZENEI RYSUNKÓW IMPULSU - indywidualnie dla każdego zestawu
-nclr<-10
+nclr<-6
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -224,12 +224,12 @@ pal<-c()
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   #pp<-1
   #theta<-theta_posterior_means
-  nclr<-10
+  nclr<-6
   #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  pal[1:8] <- brewer.pal(8, "PuBuGn")
+  pal <- brewer.pal(6, "PuBuGn")
   pal<-rev(pal)
-  pal[9:10] <- brewer.pal(3, "Oranges")[2:3]
+  #pal[9:10] <- brewer.pal(3, "Oranges")[2:3]
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -240,14 +240,9 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
 }
 
 draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
-  #pp<-1
-  #theta<-theta_posterior_means
-  nclr<-10
-  #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  pal[1:8] <- brewer.pal(8, "PuBuGn")
+  pal <- brewer.pal(6, "PuBuGn")
   pal<-rev(pal)
-  pal[9:10] <- brewer.pal(3, "Oranges")[2:3]
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])

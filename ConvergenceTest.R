@@ -7,7 +7,7 @@ post<-posterior_a
 
 main_colour <- "navy"
 main_colour2<- "deeppink3"
-variable<-'UE_W'
+variable<-'UE_7'
 country<-'USA'
 
 mh.draws <- mcmc(post)
@@ -47,20 +47,17 @@ for (i in 1:ncol(post)){
   }
 }
 
-
-
-
-print(ggplot(df,aes(df[,1]))+geom_bar())
+geweke.diag(mcmc(posterior_a$chain))
+summary(mcmc(posterior_a$chain))
 
 mh.draws<-mcmc(posterior_a$chain)
 
-png(file = paste0("trace_rho_",country,variable,".png"), width = 8.27, height = 11.69, units ="in",res=300)
+png(file = paste0("trace_rho_",country,variable,".png"), width = 12, height = 5, units ="in",res=300)
 plot( posterior_a$chain, type="s", xpd=NA, ylab="Parameter", xlab="Sample", las=1)
+dev.off()
 hist(posterior_a$chain, 50, freq=FALSE, main="", las=1,
      xlab="x", ylab="Probability density")
-library(coda)
 
-geweke.diag(mh.draws)
 png(file = paste0("geweke_plot_rho_",country,variable,".png"), width = 6, height = 5, units ="in",res=300)
 geweke.plot(mh.draws, frac1 = 0.1, frac2 = 0.5,
             nbins=40, pvalue=0.05)
@@ -70,6 +67,7 @@ png(file = paste0("autocorr_plot_rho_",country,variable,".png"), width = 6, heig
 autocorr.plot(mh.draws)
 dev.off()
 
+conv_test<-summary(mh.draws)
 
 
 

@@ -259,6 +259,22 @@ for (i in 1:pages){
   
 write.table(rbind(rho.sum,phi.sum), file = paste0("rho&phi_results_",country,variable,"_t05.csv"), sep = ";", dec = ",")
 
+
+##### WSPOLNY HAMILTON
+install.packages("viridis")
+library(viridis)
+png(file = paste0("Ha_", country,variable,"_t.png"), width = 6, height = 6, units ="in",res=300)
+plot(1,type='n',xlim=c(2012,2021),ylim=c(0.6,0.8),xlab='rok', ylab='prawdopodobieństwo ekspansji')
+for (pp in 1:73){
+  lines(p_Hamilton[,pp], type='o', col=sample(viridis(10)), lwd=2)
+}
+dev.off()
+
+plot(1,type='n',xlim=c("2012","2013","2014","2015","2016","2017","2018","2019","2020","2021"),ylim=c(0,1),xlab='ID', ylab='Frequency')
+for (pp in 1:73){
+  lines(p_Hamilton[,pp], type='o', col=sample(rainbow(10)), lwd=2)
+}
+
 ############### TWORZENEI RYSUNKÓW IMPULSU - indywidualnie dla każdego zestawu
 nclr<-9
 e<-c()

@@ -152,11 +152,12 @@ print(end - start)
 save.image(paste0("~/Desktop/Magisterka/Master_git/post_simul/posterior_USA_UE_", format(Sys.time(), "%b%d"), ".RData"))
 
 ########### PRIORS for illustration
+
+setwd("~/post_simul/")
+load("/Users/agnieszka/Desktop/Magisterka/Master_git/Master_git_W/post_simul/posterior_PL_UE_cze03.RData")
 library(grid)
 library(lattice)
 library(gridExtra)
-setwd("~/post_simul/")
-load("/Users/agnieszka/Desktop/Magisterka/Master_git/Master_git_W/post_simul/posterior_PL_UE_cze03.RData")
 posterior <- posterior_a$simul
 n<-n_regions
 #n<-n_states
@@ -256,7 +257,7 @@ for (i in 1:pages){
 ### ILLUSTRATE RHO
 title=""
 #rho
-png(file = paste0("rho_",country,"_",variable,".png"), width = 400, height = 400)
+png(file = paste0("rho_",country,"_",variable,".png"), width = 5, height = 5, units ="in",res=300)
 
 hist(v_rho, freq = FALSE, main ="", 
      xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
@@ -327,7 +328,7 @@ for (i in 1:pages){
 
 
 ############### TWORZENEI RYSUNKÓW IMPULSU - indywidualnie dla każdego zestawu
-nclr<-9
+nclr<-6
 e<-c()
 impulse <- theta_posterior_means$mu_1 - theta_posterior_means$mu_0
 for (pp in 1:N) {
@@ -346,14 +347,10 @@ m<- n_col*n_row
 pages<-ceiling(N/m)
 pal<-c()
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
-  #pp<-1
-  #theta<-theta_posterior_means
-  nclr<-9
-  #pal <- colorRampPalette(c("white", "black"), bias = 1)
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(9, "Oranges")
-  #pal<-rev(pal)
-  #pal[5] <- brewer.pal(2, "")[2]
+  pal <- brewer.pal(5, "PuBuGn")
+  pal<-rev(pal)
+  pal[6] <- brewer.pal(2, "Oranges")[2]
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])

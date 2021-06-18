@@ -177,7 +177,7 @@ for (i in 1:pages){
 ### ILLUSTRATE RHO
 title=""
 #rho
-png(file = paste0("rho_",country,"_",variable,".png"), width = 400, height = 400)
+png(file = paste0("rho_",country,"_",variable,".png"), width = 5, height = 5, units ="in",res=300)
 
 hist(v_rho, freq = FALSE, main = "", 
      xlab = NULL, ylab = NULL, nclass = 20, col = rgb(0, 0, 0, 0.5, maxColorValue = 1),
@@ -269,7 +269,7 @@ pal<-c()
 
 draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(9, "Oranges")
+  pal <- brewer.pal(9, "PuBuGn")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
@@ -281,7 +281,7 @@ draw_impulse2<-function(map,N,n,theta,W,ef,r,legend,i){
 
 draw_impulse_empty<-function(map,N,n,theta,W,ef,r,i){
   impulse <- theta$mu_1 - theta$mu_0
-  pal <- brewer.pal(9, "Oranges")
+  pal <- brewer.pal(9, "PuBuGn")
   impulse2 <- as.matrix(rep(0,N))
   impulse2[i] <- impulse[i]
   map@data$response <- as.vector(ef[,i])
